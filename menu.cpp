@@ -365,10 +365,10 @@ void imgui_render() {
 		}
 
 		if (setting().onSolidPlayerTrail) {
-			sequence_patch((uint32_t)gd::base + 0xad2ec, { 0x90, 0x90, 0x90 });
+			sequence_patch((uint32_t)libcocosbase + 0xad2ec, { 0x90, 0x90, 0x90 });
 		}
 		else {
-			sequence_patch((uint32_t)gd::base + 0xad2ec, { 0x89, 0x41, 0x10 });
+			sequence_patch((uint32_t)libcocosbase + 0xad2ec, { 0x89, 0x41, 0x10 });
 		}
 
 		if (setting().onSolidWaveTrail) {
@@ -1422,10 +1422,10 @@ void imgui_render() {
 
 			if (ImGui::Checkbox("Solid Player Trail", &setting().onSolidPlayerTrail)) {
 				if (setting().onSolidPlayerTrail) {
-					sequence_patch((uint32_t)gd::base + 0xad2ec, { 0x90, 0x90, 0x90 });
+					sequence_patch((uint32_t)libcocosbase + 0xad2ec, { 0x90, 0x90, 0x90 });
 				}
 				else {
-					sequence_patch((uint32_t)gd::base + 0xad2ec, { 0x89, 0x41, 0x10 });
+					sequence_patch((uint32_t)libcocosbase + 0xad2ec, { 0x89, 0x41, 0x10 });
 				}
 			}
 			if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
