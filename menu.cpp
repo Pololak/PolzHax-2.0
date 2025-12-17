@@ -1090,17 +1090,17 @@ void imgui_render() {
 			ImGui::SameLine(0.f, 0.f);
 			ImGui::HotKey("", setting().g_p2Click, 0.f, ImVec2(90.f, 0.f), "P2 Click");
 
-			if (ImGui::Button("Uncomplete Level", ImVec2(185, 0))) {
-				if (playLayer) {
-					gd::GameStatsManager* gsm = gd::GameStatsManager::sharedState();
+			//if (ImGui::Button("Uncomplete Level", ImVec2(185, 0))) {
+			//	if (playLayer) {
+			//		gd::GameStatsManager* gsm = gd::GameStatsManager::sharedState();
 
-					gd::GJGameLevel* level = playLayer->m_level;
+			//		gd::GJGameLevel* level = playLayer->m_level;
 
-					if (level->m_normalPercent >= 100 && gsm->hasCompletedLevel(level)) {
-						gsm->setStat("4", gsm->getStat("4") - 1);
-					}
-				}
-			}
+			//		if (level->m_normalPercent >= 100 && gsm->hasCompletedLevel(level)) {
+			//			gsm->setStat("4", gsm->getStat("4") - 1);
+			//		}
+			//	}
+			//}
 
 			if (ImGui::Button("Restart Level", ImVec2(185, 0))) {
 				if (playLayer) PlayLayer::resetLevelH(playLayer);
