@@ -43,7 +43,7 @@ bool FindLevelPopup::init() {
 	textInput->refreshLabel();
 	textInput->setAllowedChars(" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-!?:;)(/\\\"'`*=+-_%[]<>|@&^#{}%$~");
 	textInput->setLabelPlaceholderColor({ 120, 170, 240 });
-	textInput->setLabelPlaceholerScale(.5f);
+	textInput->setLabelPlaceholderScale(.5f);
 	textInput->setPosition(bg->getPosition());
 	textInput->setDelegate(this);
 	layer->addChild(textInput, 20);

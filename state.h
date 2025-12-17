@@ -37,8 +37,12 @@ struct SettingStruct {
 	bool onTextLength;
 	bool onTheVault;
 
+	bool onAlwaysNewBest;
+	bool onShowCoinsUncollected;
+	bool onPracticeCoins;
 	bool onForceDontEnter;
 	bool onForceDontFade;
+	bool onForceObjectsInvisible;
 	bool onHideAttempts;
 	bool onHidePauseButton;
 	bool onHidePauseMenu;
@@ -55,21 +59,27 @@ struct SettingStruct {
 	bool onNoGravityEffect;
 	bool onNoMiniIcon;
 	bool onNoMirror;
+	bool onNoNewBest;
 	bool onNoOrbRing;
 	bool onNoParticles;
 	bool onNoLightning;
+	bool onNoPortalShine;
 	bool onNoPulse;
 	bool onNoRespawnFlash;
+	bool onNoRobotFire;
 	bool onNoWavePulse;
+	bool onNoWaveTrail;
 	bool onNoWaveTrailBehind;
 	bool onPracticePulse;
 	bool onSameDualColor;
+	bool onSolidPlayerTrail;
 	bool onSolidWaveTrail;
 	bool onTrailAlwaysOff;
 	bool onTrailAlwaysOn;
 	bool onTrailBugFix;
 	bool onWavePulseSize;
 	float wavePulseSize = 2.1f;
+	bool onWaveTrailOnDeath;
 
 	bool onAbsolutePosition;
 	bool onCopyHack;
@@ -77,7 +87,9 @@ struct SettingStruct {
 	bool onDefaultSongBypass;
 	bool onEditorExtension;
 	bool onFreeScroll;
+	bool onHideGrid;
 	bool onHidePreviewLine;
+	bool onHideTriggerLines;
 	bool onHideUI;
 	bool onHitboxBugFix;
 	bool onLevelEdit;
@@ -85,6 +97,7 @@ struct SettingStruct {
 	bool onNoDeathX;
 	bool onObjectBypass;
 	bool onPlaceOver;
+	bool onRotationHack;
 	bool onScaleSnapBypass;
 	bool onSmoothTrail;
 	bool onToolboxBypass;
@@ -92,17 +105,31 @@ struct SettingStruct {
 	bool onZOrderBypass;
 	bool onZoomBypass;
 
+	bool onAutoDeafen;
+	bool onPauseUndeafen = true;
+	bool onPracticeDeafen;
+	bool onTestmodeDeafen;
+	float deafenPercent = 50.f;
+	float undeafenPercent = 100.f;
+	bool onAutoKill;
+	float killPercentage = 50.f;
 	bool onBallRotatingBugFix;
 	bool onCheckpointLagFix;
 	bool onConfirmExit;
 	bool onCorrectiveMusicSync;
+	bool onEverythingHurts;
 	bool onHighFPSRotationFix;
 	bool onInvisibleDualFix;
+	bool onJumpHack;
 	bool onNoclip;
+	bool onNoHitbox;
+	bool onNoSpikes;
 	bool onPauseDuringComplete;
 	bool onPracticeBugFix;
 	bool onPracticeMusic;
 	bool onLastCheckpoint;
+	bool onRespawnTime;
+	float respawnValue = 1000.f;
 	bool onShowLayout;
 	bool onSmartStartPos;
 	bool onStartPosSwitcher;
@@ -114,6 +141,7 @@ struct SettingStruct {
 	bool onAllowLowVolume;
 	bool onAntiCheatBypass;
 	bool onAutoSafeMode;
+	bool onDisableSongAlert;
 	bool onFastAltTab;
 	bool onForceVisibility;
 	bool onFreeWindowResize;
@@ -123,6 +151,7 @@ struct SettingStruct {
 	bool onSafeMode;
 	bool onShowRestartButton;
 	bool onTransparentBG;
+	bool onTransparentLists;
 	bool onZeroDelay;
 
 	float speedhack = 1.f;
@@ -166,6 +195,20 @@ struct SettingStruct {
 
 	int groupIDOffset;
 	bool onDeveloperMode;
+	int g_autoDeafenKey;
+	int g_retryKey = 0x52;
+
+	int g_previousStartPos = 0x25;
+	int g_nextStartPos = 0x27;
+
+	bool onDrawDivide;
+
+	int g_p1Click;
+	int g_p2Click;
+
+	int g_priority = 2;
+	bool onThreadPriority;
+	bool onBackupFix;
 };
 
 LayersStruct& layers();
@@ -178,6 +221,7 @@ DEF_SCHEMA(
 	isSafeMode,
 
 	onAutoSave,
+
 	onCharFilter,
 	onTheVault,
 	onIcons,
@@ -186,8 +230,12 @@ DEF_SCHEMA(
 	onSliderLimit,
 	onTextLength,
 
+	onAlwaysNewBest,
+	onShowCoinsUncollected,
+	onPracticeCoins,
 	onForceDontEnter,
 	onForceDontFade,
+	onForceObjectsInvisible,
 	onHideAttempts,
 	onHidePauseButton,
 	onHidePauseMenu,
@@ -204,21 +252,27 @@ DEF_SCHEMA(
 	onNoGravityEffect,
 	onNoMiniIcon,
 	onNoMirror,
+	onNoNewBest,
 	onNoOrbRing,
 	onNoParticles,
 	onNoLightning,
+	onNoPortalShine,
 	onNoPulse,
 	onNoRespawnFlash,
+	onNoRobotFire,
 	onNoWavePulse,
+	onNoWaveTrail,
 	onNoWaveTrailBehind,
 	onPracticePulse,
 	onSameDualColor,
+	onSolidPlayerTrail,
 	onSolidWaveTrail,
 	onTrailAlwaysOff,
 	onTrailAlwaysOn,
 	onTrailBugFix,
 	onWavePulseSize,
 	wavePulseSize,
+	onWaveTrailOnDeath,
 
 	onAbsolutePosition,
 	onCopyHack,
@@ -226,7 +280,9 @@ DEF_SCHEMA(
 	onDefaultSongBypass,
 	onEditorExtension,
 	onFreeScroll,
+	onHideGrid,
 	onHidePreviewLine,
+	onHideTriggerLines,
 	onHideUI,
 	onHitboxBugFix,
 	onLevelEdit,
@@ -234,6 +290,7 @@ DEF_SCHEMA(
 	onNoDeathX,
 	onObjectBypass,
 	onPlaceOver,
+	onRotationHack,
 	onScaleSnapBypass,
 	onSmoothTrail,
 	onToolboxBypass,
@@ -241,16 +298,30 @@ DEF_SCHEMA(
 	onZOrderBypass,
 	onZoomBypass,
 
+	onAutoDeafen,
+	onPauseUndeafen,
+	onPracticeDeafen,
+	onTestmodeDeafen,
+	deafenPercent,
+	undeafenPercent,
+	onAutoKill,
+	killPercentage,
 	onBallRotatingBugFix,
 	onConfirmExit,
 	onCorrectiveMusicSync,
+	onEverythingHurts,
 	onHighFPSRotationFix,
 	onInvisibleDualFix,
+	onJumpHack,
 	onNoclip,
+	onNoHitbox,
+	onNoSpikes,
 	onPauseDuringComplete,
 	onPracticeBugFix,
 	onPracticeMusic,
 	onLastCheckpoint,
+	onRespawnTime,
+	respawnValue,
 	onShowLayout,
 	onSmartStartPos,
 	onStartPosSwitcher,
@@ -260,6 +331,7 @@ DEF_SCHEMA(
 	onAllowLowVolume,
 	onAntiCheatBypass,
 	onAutoSafeMode,
+	onDisableSongAlert,
 	onFastAltTab,
 	onForceVisibility,
 	onFreeWindowResize,
@@ -269,6 +341,7 @@ DEF_SCHEMA(
 	onSafeMode,
 	onShowRestartButton,
 	onTransparentBG,
+	onTransparentLists,
 	onZeroDelay,
 
 	speedhack,
@@ -308,5 +381,15 @@ DEF_SCHEMA(
 	levelGColorG,
 	levelGColorB,
 
-	onDeveloperMode
+	onDeveloperMode,
+	g_autoDeafenKey,
+	g_retryKey,
+	g_previousStartPos,
+	g_nextStartPos,
+	onDrawDivide,
+	g_p1Click,
+	g_p2Click,
+	g_priority,
+	onThreadPriority,
+	onBackupFix
 )

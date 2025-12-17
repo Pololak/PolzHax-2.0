@@ -173,6 +173,14 @@ namespace gd {
         virtual void loadLevelsFailed(char const*);
         virtual void setupPageInfo(std::string, char const*);
     };
+
+    class SelectArtDelegate {
+        virtual void selectArtClosed(void*);
+    };
+
+    class CustomSongLayerDelegate {
+        virtual void customSongLayerClosed();
+    };
 }
 
 #endif

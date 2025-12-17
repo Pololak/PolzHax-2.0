@@ -28,6 +28,8 @@ namespace LevelEditorLayer {
 
 	inline void(__thiscall* removeObject)(gd::LevelEditorLayer*, gd::GameObject*, bool);
 	void __fastcall removeObjectH(gd::LevelEditorLayer*, void*, gd::GameObject*, bool);
+
+	void updatePlayerColors(gd::LevelEditorLayer*);
 	
 	void mem_init();
 }

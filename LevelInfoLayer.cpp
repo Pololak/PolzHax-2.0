@@ -1,29 +1,32 @@
 #include "LevelInfoLayer.h"
 #include "state.h"
+#include <ZipUtils.h>
 
 void LevelInfoLayer::Callback::onMoveToTop(CCObject*) {
 	auto glm = gd::GameLevelManager::sharedState();
 	std::cout << glm->m_savedLevelsDict->valueForKey(glm->getLevelKey(this->m_level->m_levelID)) << std::endl;
 }
 
-bool __fastcall LevelInfoLayer::initH(gd::LevelInfoLayer* self, void*, gd::GJGameLevel* level) {
-	if (!LevelInfoLayer::init(self, level)) return false;
-	if (setting().onCopyHack) if (self->m_copyBtn) self->m_copyBtn->setVisible(true);
+void LevelInfoLayer::showInfoLabel(gd::LevelInfoLayer* self, gd::GJGameLevel* level) {
+	auto levelInfoLabel = static_cast<CCLabelBMFont*>(self->getChildByTag(900));
 
-	auto director = CCDirector::sharedDirector();
-	auto winSize = director->getWinSize();
-
-	auto rightMenu = static_cast<CCMenu*>(self->m_likeBtn->getParent());
-
-	if (setting().onDeveloperMode) {
-		auto levelInfoLabel = CCLabelBMFont::create("", "chatFont.fnt");
-		levelInfoLabel->setScale(.6f);
-		levelInfoLabel->setPosition(director->getScreenLeft() + 60.f, winSize.height / 2.f + 120.f);
-		levelInfoLabel->setAnchorPoint({ 0.f, 1.f });
-		self->addChild(levelInfoLabel);
+	if (levelInfoLabel) {
+		std::cout << "LevelInfoLabel" << std::endl;
 
 		std::stringstream levelInfo;
 
+		//std::string levelString;
+		//switch (level->m_objectCount)
+		//{
+		//case 0:
+		//case 65535:
+		//	levelString = cocos2d::ZipUtils::decompressString(level->m_levelString, false, 0);
+		//	levelInfo << "Objects: " << std::ranges::count(levelString.begin(), levelString.end(), ';') << "\n";
+		//	break;
+		//default:
+		//	levelInfo << "Objects: " << std::to_string(level->m_objectCount) << "\n";
+		//	break;
+		//}
 		levelInfo << "LevelID: " << level->m_levelID << "\n";
 		levelInfo << "UserID: " << level->m_userID << "\n";
 		levelInfo << "AccountID: " << level->m_accountID << "\n";
@@ -50,7 +53,26 @@ bool __fastcall LevelInfoLayer::initH(gd::LevelInfoLayer* self, void*, gd::GJGam
 		levelInfo << "Rate User: " << level->m_rateUser.c_str() << "\n";
 
 		levelInfoLabel->setString(levelInfo.str().c_str());
+	}
+}
 
+bool __fastcall LevelInfoLayer::initH(gd::LevelInfoLayer* self, void*, gd::GJGameLevel* level) {
+	if (!LevelInfoLayer::init(self, level)) return false;
+	if (setting().onCopyHack) if (self->m_copyBtn) self->m_copyBtn->setVisible(true);
+
+	auto director = CCDirector::sharedDirector();
+	auto winSize = director->getWinSize();
+
+	auto rightMenu = static_cast<CCMenu*>(self->m_likeBtn->getParent());
+
+	if (setting().onDeveloperMode) {
+		auto levelInfoLabel = CCLabelBMFont::create("", "chatFont.fnt");
+		levelInfoLabel->setScale(.6f);
+		levelInfoLabel->setPosition(director->getScreenLeft() + 60.f, winSize.height / 2.f + 120.f);
+		levelInfoLabel->setAnchorPoint({ 0.f, 1.f });
+		self->addChild(levelInfoLabel, 0, 900);
+
+		if (level->m_levelString != "") showInfoLabel(self, level);
 
 		auto moveToTop = gd::CCMenuItemSpriteExtra::create(
 			CCSprite::createWithSpriteFrameName("edit_upBtn_001.png"),
@@ -72,4 +94,5 @@ void __fastcall LevelInfoLayer::levelDownloadFinishedH(gd::LevelInfoLayer* self,
 
 void LevelInfoLayer::mem_init() {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x107740), LevelInfoLayer::initH, reinterpret_cast<void**>(&LevelInfoLayer::init));
+	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x109610), LevelInfoLayer::levelDownloadFinishedH, reinterpret_cast<void**>(&LevelInfoLayer::levelDownloadFinished));
 }

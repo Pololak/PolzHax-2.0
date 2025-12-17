@@ -6,8 +6,21 @@
 #include "state.h"
 #include "patching.h"
 #include "RotateSaws.h"
+#include "EditorLayerInput.h"
 
 gd::EditorUI* editorUI = nullptr;
+EditorLayerInput* m_editorLayerInput = nullptr;
+
+void updateInputNode() {
+	if (m_editorLayerInput) {
+		if (editorUI->m_editorLayer->m_groupIDFilter < 0) {
+			m_editorLayerInput->m_input->setString("All");
+		}
+		else {
+			m_editorLayerInput->m_input->setString(std::to_string(editorUI->m_editorLayer->m_groupIDFilter).c_str());
+		}
+	}
+}
 
 void EditorUI::updateObjectHitbox(gd::EditorUI* eui) {
 	gd::LevelEditorLayer* self = eui->m_editorLayer;
@@ -53,6 +66,8 @@ void EditorUI::Callback::onNextFreeEditorLayer(CCObject*) { // BEv4
 		btn->setVisible(true);
 		btn->setEnabled(true);
 	}
+
+	updateInputNode();
 }
 
 void EditorUI::Callback::onAllEditorLayer(CCObject*) {
@@ -63,6 +78,8 @@ void EditorUI::Callback::onAllEditorLayer(CCObject*) {
 		btn->setVisible(false);
 		btn->setEnabled(false);
 	}
+
+	updateInputNode();
 }
 
 bool __fastcall EditorUI::initH(gd::EditorUI* self, void*, gd::LevelEditorLayer* editorLayer) {
@@ -119,13 +136,20 @@ bool __fastcall EditorUI::initH(gd::EditorUI* self, void*, gd::LevelEditorLayer*
 	previewModePopup->addChild(previewModeLabel);
 	previewModeLabel->setOpacity(0);
 
+	m_editorLayerInput = EditorLayerInput::create(self);
+	m_editorLayerInput->setPosition(self->m_currentGroupLabel->getPosition());
+	self->m_hideableUIElement->addObject(m_editorLayerInput);
+	self->addChild(m_editorLayerInput);
+	self->m_currentGroupLabel->setOpacity(0);
+
 	return true;
 }
 
 void __fastcall EditorUI::dtorH(gd::EditorUI* self) {
 	saveClipboard(self);
-	editorUI = nullptr;
 	EditorUI::dtor(self);
+	editorUI = nullptr;
+	m_editorLayerInput = nullptr;
 }
 
 void __fastcall EditorUI::onCopyH(gd::EditorUI* self, void*, CCObject* obj) {
@@ -362,6 +386,8 @@ void __fastcall EditorUI::onGroupUpH(gd::EditorUI* self, void*, CCObject* obj) {
 		btn->setVisible(true);
 		btn->setEnabled(true);
 	}
+
+	updateInputNode();
 }
 
 void __fastcall EditorUI::onGroupDownH(gd::EditorUI* self, void*, CCObject* obj) {
@@ -373,6 +399,8 @@ void __fastcall EditorUI::onGroupDownH(gd::EditorUI* self, void*, CCObject* obj)
 			btn->setEnabled(false);
 		}
 	}
+
+	updateInputNode();
 }
 
 void __fastcall EditorUI::moveObjectCallH(gd::EditorUI* self, void*, gd::EditCommand command) {
@@ -388,9 +416,34 @@ void __fastcall EditorUI::transformObjectCallH(gd::EditorUI* self, void*, gd::Ed
 
 bool m_isHoldingInEditor;
 
-bool __fastcall EditorUI::ccTouchBeganH(gd::EditorUI* self, void*, CCTouch* touch, CCEvent* event) {
+bool touchIntersectsInput(gd::CCTextInputNode* input, CCTouch* touch) {
+	if (!input) return false;
+
+	auto inputSize = CCSize({ input->getScaleX() * input->getContentSize().width, input->getScaleY() * input->getContentSize().height });
+
+	auto rect = CCRect{
+		input->getPositionX() - inputSize.width / 2,
+		input->getPositionY() - inputSize.height / 2,
+		inputSize.width,
+		inputSize.height
+	};
+
+	if (!rect.containsPoint(input->getParent()->convertTouchToNodeSpace(touch))) {
+		input->m_textField->detachWithIME();
+		return false;
+	}
+	else
+		return true;
+
+	updateInputNode();
+}
+
+bool __fastcall EditorUI::ccTouchBeganH(gd::EditorUI* _self, void*, CCTouch* touch, CCEvent* event) {
 	m_isHoldingInEditor = true;
-	return EditorUI::ccTouchBegan(self, touch, event);
+	if (m_editorLayerInput) {
+		if (touchIntersectsInput(m_editorLayerInput->m_input, touch)) return true;
+	}
+	return EditorUI::ccTouchBegan(_self, touch, event);
 }
 
 void __fastcall EditorUI::ccTouchEndedH(gd::EditorUI* self, void*, CCTouch* touch, CCEvent* event) {
@@ -400,6 +453,10 @@ void __fastcall EditorUI::ccTouchEndedH(gd::EditorUI* self, void*, CCTouch* touc
 
 void __fastcall EditorUI::onPlaytestH(gd::EditorUI* self, void*, CCObject* obj) {
 	if (!m_isHoldingInEditor) EditorUI::onPlaytest(self, obj);
+}
+
+void __fastcall EditorUI::onStopPlaytestH(gd::EditorUI* self, void*, CCObject* obj) {
+	EditorUI::onStopPlaytest(self, obj);
 }
 
 void __fastcall EditorUI::angleChangedH(gd::EditorUI* _self, void*, float angle) {

@@ -4,21 +4,10 @@
 #include "state.h"
 #include "patching.h"
 
-gd::EditorPauseLayer* m_editorPauseLayer{ nullptr };
-
-class SaveLevelProtocol : public gd::FLAlertLayerProtocol {
-protected:
-	void FLAlert_Clicked(gd::FLAlertLayer* layer, bool btn2) {
-		if (btn2) {
-			m_editorPauseLayer->saveLevel();
-		}
-	}
-};
-
-SaveLevelProtocol saveLevelProtocol;
-
 void EditorPauseLayer::Callback::onSaveLevel(CCObject*) {
-	gd::FLAlertLayer::create(&saveLevelProtocol, "Save", "NO", "YES", 300.f, "<cy>Save</c> the level?")->show();
+	auto alert = gd::FLAlertLayer::create(this, "Save", "NO", "YES", 300.f, "<cy>Save</c> the level?");
+	alert->setTag(3);
+	alert->show();
 }
 
 void EditorPauseLayer::Callback::onPasteString(CCObject*) {
@@ -34,17 +23,12 @@ void EditorPauseLayer::Callback::onSelectAll(CCObject*) {
 	auto editorUI = levelEditor->m_editorUI;
 
 	auto objs = CCArray::create();
-	for (int i = 0; i <= levelEditor->m_levelSections->count(); i++) {
-		if (i < 0) continue;
-		if (i >= levelEditor->m_levelSections->count()) break;
-
-		auto objectAtIndex = levelEditor->m_levelSections->objectAtIndex(i);
-		auto objArr = reinterpret_cast<CCArray*>(objectAtIndex);
-
-		for (int j = 0; j < objArr->count(); j++) {
-			auto obj = reinterpret_cast<gd::GameObject*>(objArr->objectAtIndex(j));
-			if (obj->m_editorLayer == m_editorLayer->m_groupIDFilter || (obj->m_editorLayer2 == levelEditor->m_groupIDFilter && obj->m_editorLayer2 != 0) || levelEditor->m_groupIDFilter == -1)
-				objs->addObject(obj);
+	for (auto section : CCArrayExt<CCArray*>(levelEditor->m_levelSections)) {
+		if (section) {
+			for (auto obj : CCArrayExt<gd::GameObject*>(section)) {
+				if (obj && obj->m_editorLayer == levelEditor->m_groupIDFilter || (obj->m_editorLayer2 == levelEditor->m_groupIDFilter && obj->m_editorLayer2 != 0) || levelEditor->m_groupIDFilter == -1)
+					objs->addObject(obj);
+			}
 		}
 	}
 
@@ -55,9 +39,43 @@ void EditorPauseLayer::Callback::onSelectAll(CCObject*) {
 	editorUI->updateObjectInfoLabel();
 }
 
+void EditorPauseLayer::selectAllWithDirection(gd::EditorPauseLayer* self, bool rightDir) {
+	auto editorUI = self->m_editorLayer->m_editorUI;
+	if (editorUI) {
+		auto cameraPos = self->m_editorLayer->m_objectLayer->getPosition();
+		auto cameraScale = self->m_editorLayer->m_objectLayer->getScale();
+		int centerX = -(cameraPos.x) / cameraScale + CCDirector::sharedDirector()->getWinSize().width / 2;
+
+		CCArray* arr = CCArray::create();
+		for (auto section : CCArrayExt<CCArray*>(self->m_editorLayer->m_levelSections)) {
+			if (section) {
+				for (auto obj : CCArrayExt<gd::GameObject*>(section))
+					if (obj && obj->m_editorLayer == self->m_editorLayer->m_groupIDFilter || (obj->m_editorLayer2 == self->m_editorLayer->m_groupIDFilter && obj->m_editorLayer2 != 0) || self->m_editorLayer->m_groupIDFilter == -1) {
+						if ((rightDir && obj->getPositionX() >= centerX) || (!rightDir && obj->getPositionX() <= centerX)) {
+							arr->addObject(obj);
+							self->m_editorLayer->m_editorUI->selectObjects(arr);
+						}
+					}
+			}
+		}
+
+		editorUI->updateButtons();
+		editorUI->deactivateRotationControl();
+		editorUI->deactivateScaleControl();
+		editorUI->updateObjectInfoLabel();
+	}
+}
+
+void EditorPauseLayer::Callback::onSelectAllLeft(CCObject*) {
+	selectAllWithDirection(this, false);
+}
+
+void EditorPauseLayer::Callback::onSelectAllRight(CCObject*) {
+	selectAllWithDirection(this, true);
+}
+
 void __fastcall EditorPauseLayer::customSetupH(gd::EditorPauseLayer* self) {
 	EditorPauseLayer::customSetup(self);
-	m_editorPauseLayer = self;
 
 	auto director = CCDirector::sharedDirector();
 	auto winSize = director->getWinSize();
@@ -93,9 +111,19 @@ void __fastcall EditorPauseLayer::customSetupH(gd::EditorPauseLayer* self) {
 
 	actionsMenu->addChild(onSettings);
 
-	auto onSelectAllSpr = gd::ButtonSprite::create("Select\nAll", 0x32, true, "bigFont.fnt", "GJ_button_04.png", 30.f, .4f);
+	auto selectAllRightSpr = gd::ButtonSprite::create("Select\nAll Right", 0x1e, true, "bigFont.fnt", "GJ_button_04.png", 30.f, 1.f);
+	auto selectAllRight = gd::CCMenuItemSpriteExtra::create(selectAllRightSpr, self, menu_selector(EditorPauseLayer::Callback::onSelectAllRight));
+	selectAllRight->setPosition(actionsMenu->convertToNodeSpace({ winSize.width - 115.f, director->getScreenBottom() + 30.f }));
+	actionsMenu->addChild(selectAllRight);
+
+	auto selectAllLeftSpr = gd::ButtonSprite::create("Select\nAll Left", 0x1e, true, "bigFont.fnt", "GJ_button_04.png", 30.f, 1.f);
+	auto selectAllLeft = gd::CCMenuItemSpriteExtra::create(selectAllLeftSpr, self, menu_selector(EditorPauseLayer::Callback::onSelectAllLeft));
+	selectAllLeft->setPosition(actionsMenu->convertToNodeSpace({ winSize.width - 115.f, director->getScreenBottom() + 65.f }));
+	actionsMenu->addChild(selectAllLeft);
+
+	auto onSelectAllSpr = gd::ButtonSprite::create("Select\nAll", 0x1e, true, "bigFont.fnt", "GJ_button_04.png", 30.f, 1.f);
 	auto onSelectAll = gd::CCMenuItemSpriteExtra::create(onSelectAllSpr, self, menu_selector(EditorPauseLayer::Callback::onSelectAll));
-	onSelectAll->setPosition(actionsMenu->convertToNodeSpace({ director->getScreenRight() - 50.f, director->getScreenBottom() + 110.f }));
+	onSelectAll->setPosition(actionsMenu->convertToNodeSpace({ winSize.width - 115.f, director->getScreenBottom() + 100.f }));
 	actionsMenu->addChild(onSelectAll);
 
 	auto btn = static_cast<gd::CCMenuItemSpriteExtra*>(static_cast<CCMenu*>(gd::GameManager::sharedState()->getLevelEditorLayer()->m_editorUI->m_copyBtn->getParent())->getChildByTag(45001));
@@ -105,11 +133,8 @@ void __fastcall EditorPauseLayer::customSetupH(gd::EditorPauseLayer* self) {
 			btn->setEnabled(false);
 		}
 	}
-}
 
-void __fastcall EditorPauseLayer::dtorH(gd::EditorPauseLayer* self) {
-	m_editorPauseLayer = nullptr;
-	EditorPauseLayer::dtor(self);
+	gd::GameManager::sharedState()->m_editorLayer->m_editorUI->m_currentGroupLabel->setVisible(false);
 }
 
 void __fastcall EditorPauseLayer::keyDownH(gd::EditorPauseLayer* self, void*, enumKeyCodes key) {
@@ -129,7 +154,7 @@ void __fastcall EditorPauseLayer::saveLevelH(gd::EditorPauseLayer* self) {
 
 void EditorPauseLayer::mem_init() {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x5aa90), EditorPauseLayer::customSetupH, reinterpret_cast<void**>(&EditorPauseLayer::customSetup));
-	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x5a5f0), EditorPauseLayer::dtorH, reinterpret_cast<void**>(&EditorPauseLayer::dtor));
+	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x5a5f0), EditorPauseLayer::dtorH, reinterpret_cast<void**>(&EditorPauseLayer::dtor));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x5ca20), EditorPauseLayer::keyDownH, reinterpret_cast<void**>(&EditorPauseLayer::keyDown));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x5c290), EditorPauseLayer::saveLevelH, reinterpret_cast<void**>(&EditorPauseLayer::saveLevel));
 }

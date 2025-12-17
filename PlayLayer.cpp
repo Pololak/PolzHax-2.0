@@ -21,6 +21,9 @@ bool inPractice;
 bool inTestmode;
 int smoothOut;
 
+bool m_deafenPressed = false;
+int m_startPercent = 0;
+
 static gd::GameObject* getClosestObject(std::vector<gd::GameObject*>& vec, gd::StartPosObject* startPos) {
 	gd::GameObject* closest = nullptr;
 
@@ -159,29 +162,15 @@ void PlayLayer::onPrevStartPos() {
 	pickStartPos(gd::GameManager::sharedState()->getPlayLayer(), currentStartPos - 1);
 }
 
-void PlayLayer::updateSameDualColor(gd::PlayLayer* self) {
-	//if (!self) return;
+void PlayLayer::updatePlayerColors(gd::PlayLayer* self) {
+	auto gm = gd::GameManager::sharedState();
 
-	//auto gm = gd::GameManager::sharedState();
+	if (!self->m_player2) return;
 
-	//ccColor3B p1col = gm->colorForIdx(gm->m_playerColor);
-	//ccColor3B p2col = gm->colorForIdx(gm->m_playerColor2);
+	self->m_player2->setColor(setting().onSameDualColor ? gm->colorForIdx(gm->m_playerColor) : gm->colorForIdx(gm->m_playerColor2));
+	self->m_player2->setSecondColor(setting().onSameDualColor ? gm->colorForIdx(gm->m_playerColor2) : gm->colorForIdx(gm->m_playerColor));
 
-	//CCParticleSystemQuad* p1particles = static_cast<CCParticleSystemQuad*>(self->m_player->m_particleSystems->objectAtIndex(1));
-	//CCParticleSystemQuad* p2particles = static_cast<CCParticleSystemQuad*>(self->m_player2->m_particleSystems->objectAtIndex(1));
-
-
-
-	////if (setting().onSameDualColor) {
-	//	self->m_player2->m_iconSprite->setColor(p1col);
-	//	self->m_player2->m_iconSpriteSecondary->setColor(p2col);
-	//	self->m_player2->m_iconGlowSprite->setColor(p2col);
-	//	self->m_player2->m_vehicleSprite->setColor(p1col);
-	//	self->m_player2->m_vehicleSpriteSecondary->setColor(p2col);
-	//	self->m_player2->m_vehicleGlowSprite->setColor(p2col);
-	//	self->m_player2->m_motionStreak->setColor(p2col);
-	//	self->m_
-	////}
+	self->m_player2->updateGlowColor();
 }
 
 void PlayLayer::updateCheatIndicator(gd::PlayLayer* self) {
@@ -197,12 +186,44 @@ void PlayLayer::updateCheatIndicator(gd::PlayLayer* self) {
 	}
 }
 
+void PlayLayer::updateShowHitboxes(gd::PlayLayer* self) {
+	auto playerDrawNode = static_cast<CCDrawNode*>(self->m_objectLayer->getChildByTag(124));
+	playerDrawNode->clear();
+	auto objectDrawNode = static_cast<CCDrawNode*>(self->m_objectLayer->getChildByTag(125));
+	objectDrawNode->clear();
+
+	if ((self->m_player->m_isDead && setting().onHitboxesOnDeath) || setting().onHitboxes) {
+		if (setting().onEnablePlayerHitboxes) {
+			if (self->m_player) Hitboxes::drawPlayerHitbox(self->m_player, playerDrawNode);
+			if (self->m_player2) Hitboxes::drawPlayerHitbox(self->m_player2, playerDrawNode);
+		}
+
+		for (int i = self->m_firstVisibleSection + 1; i <= self->m_lastVisibleSection - 1; i++) {
+			if (i < 0) continue;
+			if (i >= self->m_levelSections->count()) break;
+
+			auto objectAtIndex = self->m_levelSections->objectAtIndex(i);
+			auto objArr = reinterpret_cast<CCArray*>(objectAtIndex);
+
+			for (int j = 0; j < objArr->count(); j++) {
+				auto obj = reinterpret_cast<gd::GameObject*>(objArr->objectAtIndex(j));
+				if (setting().onEnableSolidHitboxes)
+					Hitboxes::drawSolidsObjectHitbox(obj, objectDrawNode);
+				if (setting().onEnableHazardHitboxes)
+					Hitboxes::drawHazardsObjectHitbox(obj, objectDrawNode);
+				if (setting().onEnableSpecialHitboxes)
+					Hitboxes::drawSpecialsObjectHitbox(obj, objectDrawNode);
+			}
+		}
+	}
+}
+
 bool __fastcall PlayLayer::initH(gd::PlayLayer* self, void*, gd::GJGameLevel* level) {
 	startPosObjects.clear();
-	if (!PlayLayer::init(self, level)) return false;
 	inPractice = false;
 	inTestmode = self->m_isTestMode;
 	smoothOut = 0;
+	if (!PlayLayer::init(self, level)) return false;
 
 	auto director = CCDirector::sharedDirector();
 	auto winSize = director->getWinSize();
@@ -210,14 +231,21 @@ bool __fastcall PlayLayer::initH(gd::PlayLayer* self, void*, gd::GJGameLevel* le
 	std::cout << "GameManager: " << gd::GameManager::sharedState() << std::endl;
 	std::cout << "FMODAudioEngine: " << gd::FMODAudioEngine::sharedEngine() << std::endl;
 
+	// Hide Attempts
 	self->m_attemptLabel->setVisible(!setting().onHideAttempts);
 
+	// Hide Pause Button
 	if (gd::GameManager::sharedState()->getGameVariable("0024")) {
 		from<gd::CCMenuItemSpriteExtra*>(self->m_uiLayer, 0x1a0)->setVisible(!setting().onHidePauseButton);
 	}
 
+	// Hide Player
 	self->m_player->setVisible(!setting().onHidePlayer);
 	self->m_player2->setVisible(!setting().onHidePlayer);
+
+	// No Wave Trail
+	self->m_player->m_hardStreak->setVisible(!setting().onNoWaveTrail);
+	self->m_player2->m_hardStreak->setVisible(!setting().onNoWaveTrail);
 
 	if (setting().onPracticeBugFix) {
 		checkpoints.clear();
@@ -300,13 +328,27 @@ bool __fastcall PlayLayer::initH(gd::PlayLayer* self, void*, gd::GJGameLevel* le
 		self->m_uiLayer->addChild(cheatIndicator, 99, 4900);
 
 		updateCheatIndicator(self);
+
+		auto playerInfo = CCLabelBMFont::create("FPS: X: Y: yVel: xVel: SlopeVel: Speed: ", "chatFont.fnt");
+		playerInfo->setAnchorPoint({ 0.f, 0.f });
+		playerInfo->setScale(.5f);
+		playerInfo->setOpacity(100);
+		self->m_uiLayer->addChild(playerInfo, 99, 4901);
 	}
+
+	updatePlayerColors(self);
 
 	return true;
 }
 
 void __fastcall PlayLayer::updateH(gd::PlayLayer* self, void*, float dt) {
 	layers().PauseLayerObject = nullptr;
+
+	if (0 < smoothOut) {
+		smoothOut--;
+		dt = 0.01666667;
+	}
+
 	PlayLayer::update(self, dt);
 
 	auto director = CCDirector::sharedDirector();
@@ -325,38 +367,16 @@ void __fastcall PlayLayer::updateH(gd::PlayLayer* self, void*, float dt) {
 	else if (!setting().onSafeMode) safeModeOFF(), setting().isSafeMode = false;
 
 	if (setting().onLockCursor && !setting().show && !self->m_hasLevelCompletedMenu && !self->m_isDead) {
-		SetCursorPos(winSize.width / 2, winSize.height / 2);
+		HWND hwnd = WindowFromDC(wglGetCurrentDC());
+		RECT winSize; GetWindowRect(hwnd, &winSize);
+		auto width = winSize.right - winSize.left;
+		auto height = winSize.bottom - winSize.top;
+		auto centerX = width / 2.f + winSize.left;
+		auto centerY = height / 2.f + winSize.top;
+		SetCursorPos(centerX, centerY);
 	}
 
-	auto playerDrawNode = static_cast<CCDrawNode*>(self->m_objectLayer->getChildByTag(124));
-	playerDrawNode->clear();
-	auto objectDrawNode = static_cast<CCDrawNode*>(self->m_objectLayer->getChildByTag(125));
-	objectDrawNode->clear();
-
-	if ((self->m_player->m_isDead && setting().onHitboxesOnDeath) || setting().onHitboxes) {
-		if (setting().onEnablePlayerHitboxes) {
-			if (self->m_player) Hitboxes::drawPlayerHitbox(self->m_player, playerDrawNode);
-			if (self->m_player2) Hitboxes::drawPlayerHitbox(self->m_player2, playerDrawNode);
-		}
-
-		for (int i = self->m_firstVisibleSection + 1; i <= self->m_lastVisibleSection - 1; i++) {
-			if (i < 0) continue;
-			if (i >= self->m_levelSections->count()) break;
-
-			auto objectAtIndex = self->m_levelSections->objectAtIndex(i);
-			auto objArr = reinterpret_cast<CCArray*>(objectAtIndex);
-
-			for (int j = 0; j < objArr->count(); j++) {
-				auto obj = reinterpret_cast<gd::GameObject*>(objArr->objectAtIndex(j));
-				if (setting().onEnableSolidHitboxes)
-					Hitboxes::drawSolidsObjectHitbox(obj, objectDrawNode);
-				if (setting().onEnableHazardHitboxes)
-					Hitboxes::drawHazardsObjectHitbox(obj, objectDrawNode);
-				if (setting().onEnableSpecialHitboxes)
-					Hitboxes::drawSpecialsObjectHitbox(obj, objectDrawNode);
-			}
-		}
-	}
+	updateShowHitboxes(self);
 
 	if (setting().onShowLayout) {
 		self->m_backgroundSprite->setColor(ccc3(setting().levelBGColorR, setting().levelBGColorG, setting().levelBGColorB));
@@ -390,11 +410,54 @@ void __fastcall PlayLayer::updateH(gd::PlayLayer* self, void*, float dt) {
 
 	if (setting().onDeveloperMode) {
 		updateCheatIndicator(self);
+
+		auto playerInfo = static_cast<CCLabelBMFont*>(self->m_uiLayer->getChildByTag(4901));
+		if (playerInfo) {
+			playerInfo->setString(CCString::createWithFormat("FPS: %.0f X: %f Y: %f yVel: %f xVel: %f SlopeVel: %f Speed: %f", ImGui::GetIO().Framerate, self->m_player->getPositionX(), self->m_player->getPositionY(), self->m_player->m_yVelocity, self->m_player->m_xVelocity, self->m_player->m_slopeYVel, self->m_player->m_playerSpeed)->getCString());
+		}
+	}
+
+	const float playerPercentPos = self->m_player->getPositionX() / self->m_levelLength * 100.f;
+
+	if (setting().onAutoKill && (setting().killPercentage <= playerPercentPos)) {
+		if (!self->m_isDead)
+			self->destroyPlayer(self->m_player);
+	}
+
+	if ((setting().onAutoDeafen && !m_deafenPressed) && /*(setting().deafenPercent > m_startPercent) &&*/ (playerPercentPos > setting().deafenPercent) && !self->m_isDead && !self->m_hasCompletedLevel) {
+		if ((self->m_isPracticeMode && !setting().onPracticeDeafen) || (self->m_isTestMode && !setting().onTestmodeDeafen)) return;
+
+		m_deafenPressed = true;
+		keybd_event(VK_MENU, 0x38, 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		keybd_event(VK_MENU, 0x38, KEYEVENTF_KEYUP, 0);
 	}
 }
 
 void __fastcall PlayLayer::destroyPlayerH(gd::PlayLayer* self, void*, gd::PlayerObject* player) {
-	if (!setting().onNoclip) return PlayLayer::destroyPlayer(self, player);
+	if (!setting().onNoclip) PlayLayer::destroyPlayer(self, player);
+
+	if (m_deafenPressed) {
+		m_deafenPressed = false;
+		keybd_event(VK_MENU, 0x38, 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0x50, KEYEVENTF_EXTENDEDKEY | 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0x50, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		keybd_event(VK_MENU, 0x38, KEYEVENTF_KEYUP, 0);
+	}
+
+	if (setting().onRespawnTime) {
+		float respawnTime = setting().respawnValue / 1000.f;
+
+		if (auto* respawnSequence = self->getActionByTag(0x10)) {
+			self->stopAction(respawnSequence);
+
+			auto* delayedSequence = CCSequence::create(CCDelayTime::create(respawnTime), CCCallFunc::create(self, callfunc_selector(gd::PlayLayer::delayedResetLevel)), nullptr);
+
+			delayedSequence->setTag(0x10);
+			self->runAction(delayedSequence);
+		}
+	}
 }
 
 void __fastcall PlayLayer::resetLevelH(gd::PlayLayer* self) {
@@ -404,10 +467,20 @@ void __fastcall PlayLayer::resetLevelH(gd::PlayLayer* self) {
 
 	PlayLayer::resetLevel(self);
 
+	if (m_deafenPressed) {
+		m_deafenPressed = false;
+		keybd_event(VK_MENU, 0x38, 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0x50, KEYEVENTF_EXTENDEDKEY | 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0x50, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		keybd_event(VK_MENU, 0x38, KEYEVENTF_KEYUP, 0);
+	}
+
 	if (setting().onPracticeBugFix) {
 		if (self->m_isPracticeMode && checkpoints.size() > 0)
 			checkpoints.back().restore(self);
 	}
+
+	if (setting().onCheckpointLagFix && (self->m_isPracticeMode || self->m_isTestMode)) smoothOut = 2;
 }
 
 void __fastcall PlayLayer::togglePracticeModeH(gd::PlayLayer* self, void* edx, bool practice) {
@@ -453,6 +526,14 @@ void __fastcall PlayLayer::levelCompleteH(gd::PlayLayer* self) {
 		checkpoints.clear();
 	}
 	PlayLayer::levelComplete(self);
+
+	if (m_deafenPressed) {
+		m_deafenPressed = false;
+		keybd_event(VK_MENU, 0x38, 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0x50, KEYEVENTF_EXTENDEDKEY | 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0x50, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		keybd_event(VK_MENU, 0x38, KEYEVENTF_KEYUP, 0);
+	}
 }
 
 void __fastcall PlayLayer::addObjectH(gd::PlayLayer* self, void*, gd::GameObject* obj) {
@@ -525,6 +606,22 @@ void __fastcall PlayLayer::spawnPlayer2H(gd::PlayLayer* self) {
 	if (setting().onInvisibleDualFix) self->m_player2->setVisible(true);
 }
 
+void __fastcall PlayLayer::pauseGameH(gd::PlayLayer* self, void*, bool idk) {
+	PlayLayer::pauseGame(self, idk);
+
+	if (setting().onPauseUndeafen && m_deafenPressed) {
+		m_deafenPressed = false;
+		keybd_event(VK_MENU, 0x38, 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0x50, KEYEVENTF_EXTENDEDKEY | 0, 0);
+		keybd_event(setting().g_autoDeafenKey, 0x50, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		keybd_event(VK_MENU, 0x38, KEYEVENTF_KEYUP, 0);
+	}
+}
+
+void __fastcall PlayLayer::showNewBestH(gd::PlayLayer* self) {
+	if (!setting().onNoNewBest) PlayLayer::showNewBest(self);
+}
+
 static inline void updateSwing(gd::PlayerObject* self, const float dt) {
 }
 
@@ -543,4 +640,6 @@ void PlayLayer::mem_init() {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x176470), PlayLayer::updateVisibilityH, reinterpret_cast<void**>(&PlayLayer::updateVisibility));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x179ef0), PlayLayer::spawnPlayer2H, reinterpret_cast<void**>(&PlayLayer::spawnPlayer2));
 	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x16e110), PlayLayer::lightningFlashH, reinterpret_cast<void**>(&PlayLayer::lightningFlash));
+	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x17dbb0), PlayLayer::pauseGameH, reinterpret_cast<void**>(&PlayLayer::pauseGame));
+	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x16d770), PlayLayer::showNewBestH, reinterpret_cast<void**>(&PlayLayer::showNewBest));
 }

@@ -12,7 +12,7 @@ protected:
 		textInput->setMaxLabelWidth(28.f);
 		textInput->setAllowedChars("0123456789");
 		textInput->setLabelPlaceholderColor({ 120, 170, 240 });
-		textInput->setLabelPlaceholerScale(.5f);
+		textInput->setLabelPlaceholderScale(.5f);
 		textInput->setMaxLabelScale(.5f);
 		textInput->setDelegate(this);
 		textInput->setString(std::to_string(setting().groupIDOffset).c_str());
@@ -44,8 +44,111 @@ public:
 	}
 };
 
+class CustomInputs : public CCLayer, gd::TextInputDelegate {
+protected:
+	gd::SetGroupIDLayer* m_parent;
+
+	bool init(gd::SetGroupIDLayer* parent) {
+		m_parent = parent;
+		if (!CCLayer::init()) return false;
+
+		auto director = CCDirector::sharedDirector();
+		auto winSize = director->getWinSize();
+
+		auto elBg = extension::CCScale9Sprite::create("square02_small.png");
+		elBg->setContentSize({ 50.f, 30.f });
+		elBg->setOpacity(100);
+		elBg->setPositionX(-125);
+		this->addChild(elBg, -1);
+
+		auto el2Bg = extension::CCScale9Sprite::create("square02_small.png");
+		el2Bg->setContentSize({ 50.f, 30.f });
+		el2Bg->setOpacity(100);
+		this->addChild(el2Bg, -1);
+
+		auto zoBg = extension::CCScale9Sprite::create("square02_small.png");
+		zoBg->setContentSize({ 50.f, 30.f });
+		zoBg->setOpacity(100);
+		zoBg->setPositionX(125);
+		this->addChild(zoBg, -1);
+
+		m_editorLayerInput = gd::CCTextInputNode::create("EL", this, "bigFont.fnt", 45.f, 30.f);
+		m_editorLayerInput->setDelegate(this);
+		m_editorLayerInput->setMaxLabelLength(3);
+		m_editorLayerInput->setAllowedChars("0123456789");
+		m_editorLayerInput->setLabelPlaceholderColor(ccc3(150, 150, 150));
+		m_editorLayerInput->setLabelPlaceholderScale(.6f);
+		m_editorLayerInput->setPositionX(-125);
+		m_editorLayerInput->setMaxLabelScale(.6f);
+		this->addChild(m_editorLayerInput);
+
+		m_editorLayer2Input = gd::CCTextInputNode::create("EL2", this, "bigFont.fnt", 45.f, 30.f);
+		m_editorLayer2Input->setDelegate(this);
+		m_editorLayer2Input->setMaxLabelLength(3);
+		m_editorLayer2Input->setAllowedChars("0123456789");
+		m_editorLayer2Input->setLabelPlaceholderColor(ccc3(150, 150, 150));
+		m_editorLayer2Input->setLabelPlaceholderScale(.6f);
+		m_editorLayer2Input->setMaxLabelScale(.6f);
+		this->addChild(m_editorLayer2Input);
+
+		m_zOrderInput = gd::CCTextInputNode::create("Z", this, "bigFont.fnt", 45.f, 30.f);
+		m_zOrderInput->setDelegate(this);
+		m_zOrderInput->setMaxLabelLength(4);
+		m_zOrderInput->setAllowedChars("-0123456789");
+		m_zOrderInput->setLabelPlaceholderColor(ccc3(150, 150, 150));
+		m_zOrderInput->setPositionX(125);
+		m_zOrderInput->setLabelPlaceholderScale(.6f);
+		m_zOrderInput->setMaxLabelScale(.6f);
+		this->addChild(m_zOrderInput);
+
+		this->updateInputNode();
+
+		return true;
+	}
+
+	virtual void textChanged(gd::CCTextInputNode* input) override {
+		if (input == m_editorLayerInput) {
+			m_parent->m_editorLayer = std::atoi(m_editorLayerInput->getString());
+			m_parent->updateEditorLayerID();
+		}
+		else if (input == m_editorLayer2Input) {
+			m_parent->m_editorLayer2 = std::atoi(m_editorLayer2Input->getString());
+			m_parent->updateEditorLayerID2();
+		}
+		else if (input == m_zOrderInput) {
+			m_parent->m_zOrder = std::atoi(m_zOrderInput->getString());
+			m_parent->updateZOrder();
+		}
+	}
+
+public:
+	gd::CCTextInputNode* m_editorLayerInput;
+	gd::CCTextInputNode* m_editorLayer2Input;
+	gd::CCTextInputNode* m_zOrderInput;
+
+	void updateInputNode() {
+		m_editorLayerInput->setString(std::to_string(m_parent->m_editorLayer).c_str());
+		m_editorLayer2Input->setString(std::to_string(m_parent->m_editorLayer2).c_str());
+		m_zOrderInput->setString(std::to_string(m_parent->m_zOrder).c_str());
+
+		if (m_parent->m_editorLayer < 0) m_editorLayerInput->setString("Mixed");
+		if (m_parent->m_editorLayer2 < 0) m_editorLayer2Input->setString("Mixed");
+		if (m_parent->m_zOrder == -1000) m_zOrderInput->setString("Mixed");
+	}
+
+	static CustomInputs* create(gd::SetGroupIDLayer* parent) {
+		CustomInputs* ret = new CustomInputs();
+		if (ret && ret->init(parent)) {
+			ret->autorelease();
+			return ret;
+		}
+		CC_SAFE_DELETE(ret);
+		return nullptr;
+	}
+};
+
 bool __fastcall SetGroupIDLayer::initH(gd::SetGroupIDLayer* self, void*, gd::GameObject* obj, CCArray* objs) {
-	if (!SetGroupIDLayer::init(self, obj, objs)) return false;
+	bool result = SetGroupIDLayer::init(self, obj, objs);
 
 	auto director = CCDirector::sharedDirector();
 	auto winSize = director->getWinSize();
@@ -66,9 +169,42 @@ bool __fastcall SetGroupIDLayer::initH(gd::SetGroupIDLayer* self, void*, gd::Gam
 	offsetInput->setPosition(offsetInputBG->getPosition());
 	self->m_pLayer->addChild(offsetInput);
 
-	return true;
+	auto customInputs = CustomInputs::create(self);
+	customInputs->setPosition(self->m_editorLayer2Label->getPosition());
+	customInputs->setTag(8590);
+	self->m_pLayer->addChild(customInputs);
+
+	self->m_editorLayerLabel->setVisible(false);
+	self->m_editorLayer2Label->setVisible(false);
+	self->m_zOrderLabel->setVisible(false);
+
+	return result;
+}
+
+void __fastcall SetGroupIDLayer::onEditorLayerH(gd::SetGroupIDLayer* self, void*, CCObject* sender) {
+	SetGroupIDLayer::onEditorLayer(self, sender);
+
+	auto customInputs = static_cast<CustomInputs*>(self->m_pLayer->getChildByTag(8590));
+	if (customInputs) customInputs->updateInputNode();
+}
+
+void __fastcall SetGroupIDLayer::onEditorLayer2H(gd::SetGroupIDLayer* self, void*, CCObject* sender) {
+	SetGroupIDLayer::onEditorLayer2(self, sender);
+
+	auto customInputs = static_cast<CustomInputs*>(self->m_pLayer->getChildByTag(8590));
+	if (customInputs) customInputs->updateInputNode();
+}
+
+void __fastcall SetGroupIDLayer::onZOrderH(gd::SetGroupIDLayer* self, void*, CCObject* sender) {
+	SetGroupIDLayer::onZOrder(self, sender);
+
+	auto customInputs = static_cast<CustomInputs*>(self->m_pLayer->getChildByTag(8590));
+	if (customInputs) customInputs->updateInputNode();
 }
 
 void SetGroupIDLayer::mem_init() {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x18b1b0), SetGroupIDLayer::initH, reinterpret_cast<void**>(&SetGroupIDLayer::init));
+	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x18d070), SetGroupIDLayer::onEditorLayerH, reinterpret_cast<void**>(&SetGroupIDLayer::onEditorLayer));
+	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x18d0f0), SetGroupIDLayer::onEditorLayer2H, reinterpret_cast<void**>(&SetGroupIDLayer::onEditorLayer2));
+	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x18d960), SetGroupIDLayer::onZOrderH, reinterpret_cast<void**>(&SetGroupIDLayer::onZOrder));
 }

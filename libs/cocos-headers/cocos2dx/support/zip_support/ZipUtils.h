@@ -163,7 +163,6 @@ namespace cocos2d
             static std::string base64URLEncode(std::string string);
 
             static std::string compressString(std::string, bool, int);
-            static std::string decompressString(std::string, bool, int);
             static void decompressString2(unsigned char*, bool, int, int);
 
             static void encryptDecrypt(std::string, int);
@@ -171,6 +170,11 @@ namespace cocos2d
 
             static char hexToChar(std::string*);
         )
+
+        static std::string decompressString(std::string p0, bool p1, int p2) {
+            auto cocosbase = GetModuleHandleA("libcocos2d.dll");
+            return reinterpret_cast<std::string(__thiscall*)(std::string, bool, int)>(GetProcAddress(cocosbase, "?decompressString@ZipUtils@cocos2d@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V34@_NH@Z"))(p0, p1, p2);
+        }
 
     private:
         static int ccInflateMemoryWithHint(unsigned char *in, unsigned int inLength, unsigned char **out, unsigned int *outLength, 

@@ -16,7 +16,7 @@ namespace ColorSelectPopup {
 
 	class Callback : public gd::ColorSelectPopup {
 	public:
-		void onDefaultColor(CCObject*);
+		void onDefault(CCObject*);
 		void onLiveEdit(CCObject*);
 	};
 

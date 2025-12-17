@@ -134,6 +134,22 @@ namespace gd {
 		void updateProgressBar() {
 			reinterpret_cast<void(__thiscall*)(PlayLayer*)>(base + 0x179430)(this);
 		}
+
+		void destroyPlayer(PlayerObject* player) {
+			reinterpret_cast<void(__thiscall*)(PlayLayer*, PlayerObject*)>(base + 0x17b560)(this, player);
+		}
+
+		void delayedResetLevel() {
+			reinterpret_cast<void(__thiscall*)(PlayLayer*)>(base + 0x17c920)(this);
+		}
+
+		void pushButton(int p0, bool p1) {
+			reinterpret_cast<void(__thiscall*)(PlayLayer*, int, bool)>(base + 0x17bac0)(this, p0, p1);
+		}
+
+		void releaseButton(int p0, bool p1) {
+			reinterpret_cast<void(__thiscall*)(PlayLayer*, int, bool)>(base + 0x17bbb0)(this, p0, p1);
+		}
 	};
 }
 

@@ -89,6 +89,9 @@ namespace EditorUI {
 	inline void(__thiscall* scaleObjects)(gd::EditorUI*, CCArray*, CCPoint);
 	void __fastcall scaleObjectsH(gd::EditorUI*, void*, CCArray*, CCPoint);
 
+	inline void(__thiscall* onStopPlaytest)(gd::EditorUI*, CCObject*);
+	void __fastcall onStopPlaytestH(gd::EditorUI*, void*, CCObject*);
+
 	void updateObjectHitbox(gd::EditorUI*);
 
 	class Callback : public gd::EditorUI {
@@ -107,13 +110,6 @@ namespace EditorUI {
 namespace EditButtonBar {
 	inline bool(__thiscall* init)(gd::EditButtonBar*, CCArray*, int, bool, int, int, CCPoint);
 	bool __fastcall initH(gd::EditButtonBar*, void*, CCArray*, int, bool, int, int, CCPoint);
-
-	void mem_init();
-}
-
-namespace LevelSettingsLayer {
-	inline bool(__thiscall* init)(gd::FLAlertLayer*, gd::LevelEditorLayer*);
-	bool __fastcall initH(gd::FLAlertLayer*, void*, gd::LevelEditorLayer*);
 
 	void mem_init();
 }

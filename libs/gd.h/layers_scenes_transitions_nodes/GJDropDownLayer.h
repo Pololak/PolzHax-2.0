@@ -60,7 +60,7 @@ namespace gd {
 		}
 		virtual void showLayer(bool noTransition) {
 			return reinterpret_cast<void(__thiscall*)(GJDropDownLayer*, bool)>(
-				base + 0x1139C0
+				base + 0xc2970
 				)(this, noTransition);
 		}
 		virtual void hideLayer(bool noTransition) {

@@ -14,11 +14,15 @@ namespace EditorPauseLayer {
 	inline void(__thiscall* saveLevel)(gd::EditorPauseLayer*);
 	void __fastcall saveLevelH(gd::EditorPauseLayer*);
 
+	void selectAllWithDirection(gd::EditorPauseLayer*, bool);
+
 	class Callback : public gd::EditorPauseLayer {
 	public:
 		void onSaveLevel(CCObject*);
 		void onPasteString(CCObject*);
 		void onSelectAll(CCObject*);
+		void onSelectAllLeft(CCObject*);
+		void onSelectAllRight(CCObject*);
 	};
 
 	void mem_init();

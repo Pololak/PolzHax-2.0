@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -96,7 +96,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\cocos-headers\extensions;$(SolutionDir)libs\cocos-headers\cocos2dx\platform\third_party\win32\OGLES;$(SolutionDir)libs\cocos-headers\cocos2dx\platform\third_party\win32;$(SolutionDir)libs\cocos-headers\cocos2dx\platform\win32;$(SolutionDir)libs\cocos-headers\cocos2dx\kazmath\include;$(SolutionDir)libs\cocos-headers\cocos2dx\include;$(SolutionDir)libs\cocos-headers\cocos2dx;$(SolutionDir)libs\MinHook;$(SolutionDir)libs\gd.h\include;$(SolutionDir)libs\gd.h;$(SolutionDir)libs\imgui-hook;$(SolutionDir)libs\imgui-hook\imgui;$(SolutionDir)libs\detours;$(SolutionDir)libs\nfd;$(SolutionDir)libs\nfd\src;$(SolutionDir)libs\nfd\src\include;$(SolutionDir)libs\fmod-headers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\cocos-headers\extensions;$(SolutionDir)libs\cocos-headers\cocos2dx\platform\third_party\win32\OGLES;$(SolutionDir)libs\cocos-headers\cocos2dx\platform\third_party\win32;$(SolutionDir)libs\cocos-headers\cocos2dx\platform\win32;$(SolutionDir)libs\cocos-headers\cocos2dx\kazmath\include;$(SolutionDir)libs\cocos-headers\cocos2dx\include;$(SolutionDir)libs\cocos-headers\cocos2dx;$(SolutionDir)libs\MinHook;$(SolutionDir)libs\gd.h\include;$(SolutionDir)libs\gd.h;$(SolutionDir)libs\imgui-hook;$(SolutionDir)libs\imgui-hook\imgui;$(SolutionDir)libs\detours;$(SolutionDir)libs\nfd;$(SolutionDir)libs\nfd\src;$(SolutionDir)libs\nfd\src\include;$(SolutionDir)libs\fmod-headers\;$(SolutionDir)libs\cocos-headers\cocos2dx\support;$(SolutionDir)libs\cocos-headers\cocos2dx\support\zip_support;$(SolutionDir)libs\cocos-headers\cocos2dx\robtop;$(SolutionDir)libs\cocos-headers\cocos2dx\robtop\xml;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -160,6 +160,8 @@
     <ClInclude Include="ColorSelectPopup.h" />
     <ClInclude Include="CrashLogger.h" />
     <ClInclude Include="CustomizeObjectLayer.h" />
+    <ClInclude Include="EditLevelLayer.h" />
+    <ClInclude Include="EditorLayerInput.h" />
     <ClInclude Include="EditorOptionsLayer.h" />
     <ClInclude Include="EditorPauseLayer.h" />
     <ClInclude Include="EditorSmartStartPos.h" />
@@ -167,11 +169,14 @@
     <ClInclude Include="EndLevelLayer.h" />
     <ClInclude Include="explorer.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="GJScaleControl.hpp" />
     <ClInclude Include="Hitboxes.h" />
+    <ClInclude Include="ImGuiUtils.hpp" />
     <ClInclude Include="InfoLayer.h" />
     <ClInclude Include="LevelEditorLayer.h" />
     <ClInclude Include="LevelInfoLayer.h" />
     <ClInclude Include="FindLevelPopup.h" />
+    <ClInclude Include="LevelSettingsLayer.hpp" />
     <ClInclude Include="LevelShare.h" />
     <ClInclude Include="libs\cocos-headers\cocos2dx\actions\CCAction.h" />
     <ClInclude Include="libs\cocos-headers\cocos2dx\actions\CCActionCamera.h" />
@@ -574,6 +579,7 @@
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\CCBlockLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\CustomSongWidget.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\DrawGridLayer.h" />
+    <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\EditLevelLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\EditorUI.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\EndLevelLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\FLAlertLayer.h" />
@@ -584,9 +590,11 @@
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\LevelBrowserLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\LevelEditorLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\LevelInfoLayer.h" />
+    <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\LevelSettingsLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\LoadingCircle.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\LoadingLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\MenuLayer.h" />
+    <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\OptionsLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\PauseLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\PlayLayer.h" />
     <ClInclude Include="libs\gd.h\layers_scenes_transitions_nodes\ScrollingLayer.h" />
@@ -599,6 +607,7 @@
     <ClInclude Include="libs\gd.h\manager_nodes\GameLevelManager.h" />
     <ClInclude Include="libs\gd.h\manager_nodes\GameManager.h" />
     <ClInclude Include="libs\gd.h\manager_nodes\GameSoundManager.h" />
+    <ClInclude Include="libs\gd.h\manager_nodes\GameStatsManager.h" />
     <ClInclude Include="libs\gd.h\manager_nodes\GManager.h" />
     <ClInclude Include="libs\gd.h\menu_nodes\CCMenuItemSpriteExtra.h" />
     <ClInclude Include="libs\gd.h\menu_nodes\CCMenuItemToggler.h" />
@@ -651,6 +660,7 @@
     <ClInclude Include="schema.hpp" />
     <ClInclude Include="SetGroupIDLayer.h" />
     <ClInclude Include="state.h" />
+    <ClInclude Include="UILayer.hpp" />
     <ClInclude Include="utils.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -663,20 +673,25 @@
     <ClCompile Include="CustomizeObjectLayer.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="CustomMoveButtons.cpp" />
+    <ClCompile Include="EditLevelLayer.cpp" />
+    <ClCompile Include="EditorLayerInput.cpp" />
     <ClCompile Include="EditorOptionsLayer.cpp" />
     <ClCompile Include="EditorPauseLayer.cpp" />
     <ClCompile Include="EditorSmartStartPos.cpp" />
     <ClCompile Include="EditorUI.cpp" />
     <ClCompile Include="EndLevelLayer.cpp" />
     <ClCompile Include="explorer.cpp" />
+    <ClCompile Include="GJScaleControl.cpp" />
     <ClCompile Include="GlobalClipboard.cpp" />
     <ClCompile Include="GlobalClipboard.h" />
     <ClCompile Include="Hitboxes.cpp" />
     <ClCompile Include="HSVWidgetPopup.cpp" />
+    <ClCompile Include="ImGuiUtils.cpp" />
     <ClCompile Include="InfoLayer.cpp" />
     <ClCompile Include="LevelEditorLayer.cpp" />
     <ClCompile Include="LevelInfoLayer.cpp" />
     <ClCompile Include="FindLevelPopup.cpp" />
+    <ClCompile Include="LevelSettingsLayer.cpp" />
     <ClCompile Include="libs\imgui-hook\imgui-hook.cpp" />
     <ClCompile Include="libs\imgui-hook\imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="libs\imgui-hook\imgui\backends\imgui_impl_win32.cpp" />
@@ -704,6 +719,7 @@
     <ClCompile Include="SetGroupIDLayer.cpp" />
     <ClCompile Include="SpeedHack.cpp" />
     <ClCompile Include="state.cpp" />
+    <ClCompile Include="UILayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\glew32.lib" />

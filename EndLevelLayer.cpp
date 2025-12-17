@@ -1,5 +1,5 @@
 #include "EndLevelLayer.h"
-#include "state.h";
+#include "state.h"
 
 void EndLevelLayer::Callback::onLastCheckpoint(CCObject* sender) {
 	if (auto pl = gd::GameManager::sharedState()->getPlayLayer()) {

@@ -5,8 +5,48 @@
 
 RGBColorInputWidget* m_colorInputWidget{ nullptr };
 
-void ColorSelectPopup::Callback::onDefaultColor(CCObject* obj) {
+void doDefaultAction(gd::ColorSelectPopup* self, gd::GJEffectManager* effectManager, int colorID) {
+	auto colorAction = effectManager->getColorAction(colorID);
+	if (colorAction) {
+		self->m_colorPicker->setColorValue(colorAction->m_fromColor);
 
+		if (self->m_isBlending != colorAction->m_blending)
+			self->onToggleTintMode(nullptr);
+
+		self->m_opacity = colorAction->m_fromOpacity;
+
+		self->updateOpacityLabel();
+
+		if (self->m_opacitySlider)
+			self->m_opacitySlider->setValue(self->m_opacity);
+	}
+}
+
+void ColorSelectPopup::Callback::onDefault(CCObject* obj) {
+	auto editorLayer = gd::GameManager::sharedState()->getLevelEditorLayer();
+	if (!editorLayer) return;
+
+	auto effectManager = editorLayer->m_levelSettings->m_effectManager;
+
+	switch (this->m_targetObject->m_objectID)
+	{
+	case 29:
+		doDefaultAction(this, effectManager, 1000); break;
+	case 30:
+		doDefaultAction(this, effectManager, 1001); break;
+	case 900:
+		doDefaultAction(this, effectManager, 1009); break;
+	case 915:
+		doDefaultAction(this, effectManager, 1002); break;
+	case 105:
+		doDefaultAction(this, effectManager, 1004); break;
+	case 744:
+		doDefaultAction(this, effectManager, 1003); break;
+	case 899:
+		doDefaultAction(this, effectManager, this->m_colorID); break;
+	default: return;
+		break;
+	}
 }
 
 void ColorSelectPopup::Callback::onLiveEdit(CCObject*) {
@@ -38,6 +78,13 @@ bool __fastcall ColorSelectPopup::initH(gd::ColorSelectPopup* self, void*, gd::G
 		auto onLiveEdit = gd::CCMenuItemSpriteExtra::create(liveEditSpr, self, menu_selector(ColorSelectPopup::Callback::onLiveEdit));
 		onLiveEdit->setPosition(90.f, 260.f);
 		self->m_pButtonMenu->addChild(onLiveEdit, 0, 9807);
+	}
+
+	if (self->m_fadeTimeSlider && self->m_targetObject) {
+		auto onDefaultSpr = gd::ButtonSprite::create("Default", 0x28, false, "goldFont.fnt", "GJ_button_04.png", 30.f, .6f);
+		auto onDefault = gd::CCMenuItemSpriteExtra::create(onDefaultSpr, self, menu_selector(ColorSelectPopup::Callback::onDefault));
+		onDefault->setPosition(190.f, 178.f);
+		self->m_pButtonMenu->addChild(onDefault);
 	}
 
 	return true;

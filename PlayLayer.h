@@ -44,9 +44,17 @@ namespace PlayLayer {
 	inline void(__thiscall* spawnPlayer2)(gd::PlayLayer*);
 	void __fastcall spawnPlayer2H(gd::PlayLayer*);
 
-	void updateSameDualColor(gd::PlayLayer*);
+	inline void(__thiscall* pauseGame)(gd::PlayLayer*, bool);
+	void __fastcall pauseGameH(gd::PlayLayer*, void*, bool);
+
+	inline void(__thiscall* showNewBest)(gd::PlayLayer*);
+	void __fastcall showNewBestH(gd::PlayLayer*);
+
+	void updatePlayerColors(gd::PlayLayer*);
 
 	void updateCheatIndicator(gd::PlayLayer*);
+
+	void updateShowHitboxes(gd::PlayLayer*);
 
 	void onPrevStartPos();
 	void onNextStartPos();

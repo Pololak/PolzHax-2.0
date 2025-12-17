@@ -16,6 +16,7 @@ void __fastcall PauseLayer::onProgressBarH(gd::PauseLayer* self, void*, CCObject
     const auto bar = gd::GameManager::sharedState()->getProgressBar();
     auto size = CCDirector::sharedDirector()->getWinSize();
     auto playLayer = gd::GameManager::sharedState()->getPlayLayer();
+
     if (playLayer) {
         auto percentLabel = playLayer->m_percentLabel;
         if (percentLabel) {
@@ -23,7 +24,9 @@ void __fastcall PauseLayer::onProgressBarH(gd::PauseLayer* self, void*, CCObject
             percentLabel->setPosition({ size.width / 2.f + (bar ? 0.f : 110.2f), size.height - 8.f });
         }
     }
+
     PauseLayer::onProgressBar(self, obj);
+
     if (playLayer) {
         auto percentLabel = playLayer->m_percentLabel;
         if (percentLabel) {

@@ -108,7 +108,7 @@ void __fastcall EditorUI::createMoveMenuH(gd::EditorUI* self) {
 	unitRight->setTag(static_cast<int>(moveForCommand::kEditCommandUnitRight));
 	self->m_moveButtonBar->m_buttonArray->addObject(unitRight);
 
-	auto rotate265Label = CCLabelBMFont::create("26.5", "bigFont.fnt");
+	auto rotate265Label = CCLabelBMFont::create("26", "bigFont.fnt");
 	rotate265Label->setScale(.45f);
 	rotate265Label->setPosition({ 20.f, 22.f });
 
@@ -125,7 +125,7 @@ void __fastcall EditorUI::createMoveMenuH(gd::EditorUI* self) {
 	auto circleToolLabel = CCLabelBMFont::create("Circle\nTool", "bigFont.fnt", 0.f, CCTextAlignment::kCCTextAlignmentCenter);
 	circleToolLabel->setScale(.35f);
 	circleToolLabel->setPosition({ 20.f, 22.f });
-	auto circleTool = self->getSpriteButton("edit_ccwBtn_001.png", menu_selector(EditorUI::Callback::onCircleTool), nullptr, 9.f);
+	auto circleTool = self->getSpriteButton("edit_ccwBtn_001.png", menu_selector(EditorUI::Callback::onCircleTool), nullptr, .9f);
 	static_cast<gd::ButtonSprite*>(circleTool->getChildren()->objectAtIndex(0))->addChild(circleToolLabel, 5);
 	self->m_moveButtonBar->m_buttonArray->addObject(circleTool);
 
@@ -214,10 +214,10 @@ void __fastcall EditorUI::transformObjectH(gd::EditorUI* self, void* edx, gd::Ga
 		switch (com)
 		{
 		case rotationForCommand::kEditCommandRotate265CW:
-			self->rotateObjects(selectedObjects, (26.565f / selectedObjCount), { 0,0 });
+			self->rotateObjects(selectedObjects, (26.f / selectedObjCount), { 0,0 });
 			break;
 		case rotationForCommand::kEditCommandRotate265CCW:
-			self->rotateObjects(selectedObjects, -(26.565f / selectedObjCount), { 0,0 });
+			self->rotateObjects(selectedObjects, -(26.f / selectedObjCount), { 0,0 });
 			break;
 		}
 	}

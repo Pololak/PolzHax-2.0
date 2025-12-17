@@ -13,6 +13,29 @@ namespace gd {
 
 	class GJRobotSprite : public CCAnimatedSprite {
 	public:
+		cocos2d::CCArray* m_unkArray; // 0x218
+		cocos2d::ccColor3B m_color; // 0x21c
+		PAD(1)
+		cocos2d::ccColor3B m_secondColor; // 0x220
+		PAD(1)
+		cocos2d::CCArray* m_unkArray2; // 0x224
+		cocos2d::CCSprite* m_glowSprite; // 0x228
+		cocos2d::CCSprite* m_fireBoostSprite; // 0x22c
+		void* m_headSprite; // 0x230
+
+		void updateColors() {
+			reinterpret_cast<void(__thiscall*)(GJRobotSprite*)>(base + 0xe2270)(this);
+		}
+
+		void updateColor01(cocos2d::ccColor3B col) {
+			this->m_color = col;
+			this->updateColors();
+		}
+
+		void updateColor02(cocos2d::ccColor3B col) {
+			this->m_secondColor = col;
+			this->updateColors();
+		}
 	};
 
 	class PlayerObject : public GameObject, AnimatedSpriteDelegate {
@@ -40,7 +63,27 @@ namespace gd {
 		double m_xVelocity; // 0x478
 		double m_jumpAccel; // 0x480
 		double m_gravity; // 0x488
-		PAD(0x50)
+		PAD(0x4) // 0x490
+		PAD(0x4) // 0x494
+		PAD(0x4) // 0x498
+		PAD(0x4) // 0x49c
+		PAD(0x4) // 0x4a0
+		PAD(0x4) // 0x4a4
+		PAD(0x4) // 0x4a8
+		PAD(0x4) // 0x4ac
+		PAD(0x4) // 0x4b0
+		PAD(0x4) // 0x4b4
+		PAD(0x4) // 0x4b8
+		PAD(0x4) // 0x4bc
+		PAD(0x4) // 0x4c0
+		PAD(0x4) // 0x4c4
+		PAD(0x4) // 0x4c8
+		PAD(0x4) // 0x4cc
+		PAD(0x4) // 0x4d0
+		PAD(0x4) // 0x4d4
+		PAD(0x4) // 0x4d8
+		PAD(0x4) // 0x4dc
+		PAD(0x4) // 0x4e0
 		GJRobotSprite* m_robotSprite; // 0x4e4
 		PAD(0x4)
 		cocos2d::CCParticleSystemQuad* m_playerGroundParticles; // 0x4ec
@@ -52,7 +95,18 @@ namespace gd {
 		PAD(0x4)
 		cocos2d::CCParticleSystemQuad* m_unkP3; // 0x508
 		cocos2d::CCParticleSystemQuad* m_unkP4; // 0x50c
-		PAD(48)
+		float m_landParticlesAngle; // 0x510
+		float m_landParticleRelatedY; // 0x514
+		int m_playerStreak; // 0x518
+		PAD(0x4) // 0x51c
+		PAD(0x4) // 0x520
+		PAD(0x4) // 0x524
+		PAD(0x4) // 0x528
+		PAD(0x4) // 0x52c
+		PAD(0x4) // 0x530
+		PAD(0x4) // 0x534
+		PAD(0x4) // 0x538
+		PAD(0x4) // 0x53c
 		double m_yVelocity; // 0x540
 		bool m_isOnSlope; // 0x548
 		bool m_wasOnSlope; // 0x549
@@ -110,12 +164,17 @@ namespace gd {
 		}
 
 		virtual void setColor(cocos2d::_ccColor3B const& color) {
-			return reinterpret_cast<void(__thiscall*)(PlayerObject*, cocos2d::_ccColor3B const&)>(base + 0x166fd0)(reinterpret_cast<PlayerObject*>(this) + 0xe8, color);
+			return reinterpret_cast<void(__thiscall*)(PlayerObject*, cocos2d::_ccColor3B const&)>(base + 0x166fd0)(this, color);
 		}
 
 		void setSecondColor(cocos2d::_ccColor3B const& color) {
-			m_iconSpriteSecondary->setColor(color);
-			m_vehicleSpriteSecondary->setColor(color);
+			this->m_iconSpriteSecondary->setColor(color);
+			this->m_vehicleSpriteSecondary->setColor(color);
+			this->m_robotSprite->updateColor02(color);
+		}
+
+		void updateGlowColor() {
+			reinterpret_cast<void(__thiscall*)(PlayerObject*)>(base + 0x167030)(this);
 		}
 	};
 }

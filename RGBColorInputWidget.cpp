@@ -34,7 +34,7 @@ bool RGBColorInputWidget::init(gd::ColorSelectPopup* parent) {
     red_input->setMaxLabelLength(3);
     red_input->setMaxLabelScale(0.6f);
     red_input->setLabelPlaceholderColor(placeholder_color);
-    red_input->setLabelPlaceholerScale(0.5f);
+    red_input->setLabelPlaceholderScale(0.5f);
     red_input->setPositionX(r_xpos);
     red_input->setDelegate(this);
 
@@ -43,7 +43,7 @@ bool RGBColorInputWidget::init(gd::ColorSelectPopup* parent) {
     green_input->setMaxLabelLength(3);
     green_input->setMaxLabelScale(0.6f);
     green_input->setLabelPlaceholderColor(placeholder_color);
-    green_input->setLabelPlaceholerScale(0.5f);
+    green_input->setLabelPlaceholderScale(0.5f);
     green_input->setPositionX(0.f);
     green_input->setDelegate(this);
 
@@ -52,7 +52,7 @@ bool RGBColorInputWidget::init(gd::ColorSelectPopup* parent) {
     blue_input->setMaxLabelLength(3);
     blue_input->setMaxLabelScale(0.6f);
     blue_input->setLabelPlaceholderColor(placeholder_color);
-    blue_input->setLabelPlaceholerScale(0.5f);
+    blue_input->setLabelPlaceholderScale(0.5f);
     blue_input->setPositionX(b_xpos);
     blue_input->setDelegate(this);
 
@@ -61,7 +61,7 @@ bool RGBColorInputWidget::init(gd::ColorSelectPopup* parent) {
     hex_input->setMaxLabelLength(6);
     hex_input->setMaxLabelScale(0.7f);
     hex_input->setLabelPlaceholderColor(placeholder_color);
-    hex_input->setLabelPlaceholerScale(0.5f);
+    hex_input->setLabelPlaceholderScale(0.5f);
     hex_input->setPositionY(hex_y);
     hex_input->setDelegate(this);
 

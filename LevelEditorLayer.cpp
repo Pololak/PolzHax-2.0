@@ -34,6 +34,8 @@ bool __fastcall LevelEditorLayer::initH(gd::LevelEditorLayer* self, void*, gd::G
 	auto objectDrawNode = CCDrawNode::create();
 	self->m_objectLayer->addChild(objectDrawNode, 1000, 125);
 
+	updatePlayerColors(self);
+
 	return true;
 }
 
@@ -95,6 +97,23 @@ void __fastcall LevelEditorLayer::updateH(gd::LevelEditorLayer* self, void*, flo
 	}
 }
 
+void LevelEditorLayer::updatePlayerColors(gd::LevelEditorLayer* self) {
+	auto gm = gd::GameManager::sharedState();
+
+	if (!self->m_player2) return;
+
+	self->m_player2->setColor(setting().onSameDualColor ? gm->colorForIdx(gm->m_playerColor) : gm->colorForIdx(gm->m_playerColor2));
+	self->m_player2->setSecondColor(setting().onSameDualColor ? gm->colorForIdx(gm->m_playerColor2) : gm->colorForIdx(gm->m_playerColor));
+
+	self->m_player2->updateGlowColor();
+}
+
+//void __fastcall LevelEditorLayer::onStopPlaytestH(gd::LevelEditorLayer* self) {
+//	LevelEditorLayer::onStopPlaytest(self);
+//
+//	self->m_editorUI->m_currentGroupLabel->setVisible(false);
+//}
+
 void __fastcall DrawGridLayer::drawH(gd::DrawGridLayer* self) {
 	DrawGridLayer::draw(self);
 
@@ -115,20 +134,25 @@ void __fastcall DrawGridLayer::drawH(gd::DrawGridLayer* self) {
 					auto triggerTimePos = self->m_editorLayer->timeForXPos(trig->getPositionX());
 					auto triggerFadeEnd = self->xPosForTime(triggerTimePos + trig->m_triggerDuration);
 
-					glLineWidth(2);
-					ccDrawColor4B(100, 100, 100, 75);
-					ccDrawLine(trig->getPosition(), { triggerFadeEnd, trig->getPositionY() });
+					if (trig->m_triggerDuration > 0) {
+						glLineWidth(2);
+						ccDrawColor4B(100, 100, 100, 75);
+						ccDrawLine(trig->getPosition(), { triggerFadeEnd, trig->getPositionY() });
+					}
 					break;
 				}
 
 				if (obj->m_objectID == 1006) {
 					gd::EffectGameObject* pulseTrig = static_cast<gd::EffectGameObject*>(obj);
 					auto pulseTimePos = self->m_editorLayer->timeForXPos(pulseTrig->getPositionX());
-					auto pulseTimeEnd = self->xPosForTime(pulseTimePos + pulseTrig->m_fadeInTime + pulseTrig->m_holdTime + pulseTrig->m_fadeOutTime);
+					float totalTime = (pulseTimePos + pulseTrig->m_fadeInTime + pulseTrig->m_holdTime + pulseTrig->m_fadeOutTime);
+					auto pulseTimeEnd = self->xPosForTime(totalTime);
 
-					glLineWidth(2);
-					ccDrawColor4B(100, 100, 100, 75);
-					ccDrawLine(pulseTrig->getPosition(), { pulseTimeEnd, pulseTrig->getPositionY() });
+					//if () {
+					//	glLineWidth(2);
+					//	ccDrawColor4B(100, 100, 100, 75);
+					//	ccDrawLine(pulseTrig->getPosition(), { pulseTimeEnd, pulseTrig->getPositionY() });
+					//}
 				}
 			}
 		}

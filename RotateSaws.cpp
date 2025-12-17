@@ -106,12 +106,6 @@ void __fastcall LevelEditorLayer::onPausePlaytestH(gd::LevelEditorLayer* self) {
 	if (setting().onRotateSaws) RotateSaws::pauseRotations(self);
 }
 
-void __fastcall LevelEditorLayer::onStopPlaytestH(gd::LevelEditorLayer* self) {
-	LevelEditorLayer::onStopPlaytest(self);
-
-	if (setting().onRotateSaws) RotateSaws::stopRotations(self);
-}
-
 void __fastcall LevelEditorLayer::addSpecialH(gd::LevelEditorLayer* self, void*, gd::GameObject* obj) {
 	LevelEditorLayer::addSpecial(self, obj);
 	if (setting().onRotateSaws && RotateSaws::objectIsSaw(obj)) RotateSaws::beginRotateSaw(obj);

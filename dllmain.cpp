@@ -8,6 +8,7 @@
 #include "utils.hpp"
 #include "patching.h"
 #include "imgui-hook.hpp"
+#include <filesystem>
 
 #include "PlayLayer.h"
 #include "PauseLayer.h"
@@ -24,6 +25,10 @@
 #include "PlayerObject.h"
 #include "FindLevelPopup.h"
 #include "SetGroupIDLayer.h"
+#include "EditLevelLayer.h"
+#include "LevelSettingsLayer.hpp"
+#include "UILayer.hpp"
+#include "GJScaleControl.hpp"
 
 #include "LevelShare.h"
 #include "nfd.h"
@@ -53,45 +58,39 @@ void __fastcall CCParticleSystem_initWithTotalParticlesH(CCParticleSystem* self,
 	else return CCParticleSystem_initWithTotalParticles(self, amt);
 }
 
-bool(__thiscall* CCKeyboardDispatcher_dispatchKeyboardMSG)(cocos2d::CCKeyboardDispatcher* self, int key, bool down);
-void __fastcall CCKeyboardDispatcher_dispatchKeyboardMSGH(CCKeyboardDispatcher* self, void* edx, int key, bool down) {
+bool(__thiscall* CCKeyboardDispatcher_dispatchKeyboardMSG)(cocos2d::CCKeyboardDispatcher*, enumKeyCodes, bool);
+bool __fastcall CCKeyboardDispatcher_dispatchKeyboardMSGH(CCKeyboardDispatcher* self, void*, enumKeyCodes key, bool down) {
 	auto pl = gd::GameManager::sharedState()->getPlayLayer();
+
 	if (down) {
-		if ((key == 'R') && setting().onRetryKeybind) {
+		if ((key == setting().g_retryKey) && setting().onRetryKeybind) {
 			if (pl) {
 				if (!pl->m_hasCompletedLevel) {
 					pl->resetLevel();
+
 					if (layers().PauseLayerObject)
 					{
 						layers().PauseLayerObject->removeMeAndCleanup();
 						layers().PauseLayerObject = nullptr;
+						pl->resume();
 					}
-					pl->resume();
-					return;
 				}
 			}
 		}
+
 		if (pl) {
 			if (setting().onStartPosSwitcher && !pl->m_hasCompletedLevel) {
-				switch (key)
-				{
-				case KEY_Q:
-				case KEY_Left:
-				case KEY_A:
+				if (key == setting().g_previousStartPos) {
 					PlayLayer::onPrevStartPos();
-					std::cout << "PrevStartPos" << std::endl;
-					break;
-				case KEY_E:
-				case KEY_Right:
-				case KEY_D:
+				}
+				else if (key == setting().g_nextStartPos) {
 					PlayLayer::onNextStartPos();
-					std::cout << "NextStartPos" << std::endl;
-					break;
 				}
 			}
 		}
 	}
-	CCKeyboardDispatcher_dispatchKeyboardMSG(self, key, down);
+
+	return CCKeyboardDispatcher_dispatchKeyboardMSG(self, key, down);
 }
 
 void(__thiscall* CCTransitionScene_initWithDuration)(CCTransitionScene*, float, CCScene*);
@@ -105,34 +104,8 @@ void __fastcall RingObject_spawnCircleH(gd::GameObject* self) {
 	if (!setting().onNoOrbRing) return RingObject_spawnCircle(self);
 }
 
-namespace gd {
-	class EditLevelLayer : public CCLayer {
-	public:
-		GJGameLevel* level() {
-			return from<GJGameLevel*>(this, 0x12c);
-		}
-		static auto scene(GJGameLevel* level) {
-			return reinterpret_cast<cocos2d::CCScene * (__fastcall*)(GJGameLevel*)>(base + 0x56f00)(level);
-		}
-	};
-
-	class LevelSettingsLayer : public FLAlertLayer {
-	public:
-	};
-}
-
 class ImportExportCB {
 public:
-	void onExportLevelELL(CCObject* obj) {
-		auto* const level = reinterpret_cast<gd::EditLevelLayer*>(reinterpret_cast<CCNode*>(obj)->getParent()->getParent())->level();
-		nfdchar_t* path = nullptr;
-		if (NFD_SaveDialog("gmd", nullptr, &path) == NFD_OKAY) {
-			std::ofstream file(path);
-			dump_level(level, file);
-			free(path);
-			gd::FLAlertLayer::create(nullptr, "Success", "OK", nullptr, "The level has been saved.")->show();
-		}
-	}
 	void onImportLevelLBL(CCObject* obj) {
 		nfdchar_t* path = nullptr;
 		if (NFD_OpenDialog("gmd", nullptr, &path) == NFD_OKAY) {
@@ -148,51 +121,6 @@ public:
 		}
 	}
 };
-
-class EditLevelLayerCB : public gd::EditLevelLayer, gd::FLAlertLayerProtocol {
-public:
-	void onResetPercentage(CCObject*) {
-		gd::GJGameLevel* level = from<gd::GJGameLevel*>(this, 0x12c);
-		level->m_normalPercentRand1 = 0;
-		level->m_normalPercentRand2 = 0;
-		level->m_normalPercent = 0;
-		level->m_practicePercent = 0;
-		level->m_isVerified = false;
-	}
-};
-
-bool(__thiscall* EditLevelLayer_init)(gd::EditLevelLayer*, gd::GJGameLevel*);
-bool __fastcall EditLevelLayer_initH(gd::EditLevelLayer* self, void*, gd::GJGameLevel* level) {
-	if (!EditLevelLayer_init(self, level)) return false;
-
-	auto director = CCDirector::sharedDirector();
-
-	auto shareMenu = CCMenu::create();
-
-	auto btn_spr = CCSprite::createWithSpriteFrameName("GJ_downloadBtn_001.png");
-	if (!btn_spr->initWithFile("BE_Export_File.png")) {
-		btn_spr->initWithSpriteFrameName("GJ_downloadBtn_001.png");
-	}
-	auto button = gd::CCMenuItemSpriteExtra::create(btn_spr, nullptr, self, menu_selector(ImportExportCB::onExportLevelELL));
-	button->setPosition({ -30, +30 });
-
-	shareMenu->setZOrder(1);
-	shareMenu->setPosition({ director->getScreenRight(), director->getScreenBottom() });
-	shareMenu->addChild(button);
-	self->addChild(shareMenu);
-
-	auto mainMenu = from<CCMenu*>(self, 0x128);
-
-	if (setting().onDeveloperMode) {
-		auto onResetPercentageSpr = CCSprite::createWithSpriteFrameName("GJ_replayBtn_001.png");
-		auto onResetPercentage = gd::CCMenuItemSpriteExtra::create(onResetPercentageSpr, self, menu_selector(EditLevelLayerCB::onResetPercentage));
-		onResetPercentageSpr->setOpacity(100);
-		onResetPercentage->setPositionX(-180);
-		mainMenu->addChild(onResetPercentage);
-	}
-
-	return true;
-}
 
 class LevelBrowserLayerCB : public gd::LevelBrowserLayer {
 public:
@@ -232,6 +160,12 @@ bool __fastcall LevelBrowserLayer_initH(gd::LevelBrowserLayer* self, void*, gd::
 		}
 	}
 
+	//std::cout << gd::GameStatsManager::sharedState() << std::endl;
+	//std::cout << gd::GameStatsManager::sharedState()->m_idk << std::endl;
+	//std::cout << gd::GameStatsManager::sharedState()->m_idk2 << std::endl;
+	//std::cout << gd::GameStatsManager::sharedState()->m_idk3 << std::endl;
+	//std::cout << gd::GameStatsManager::sharedState()->m_idk4 << std::endl;
+
 	return true;
 }
 
@@ -250,18 +184,6 @@ void __fastcall CCTextInputNode_updateLabelH(gd::CCTextInputNode* self, void*, s
 			" ";
 		CCTextInputNode_updateLabel(self, std::move(string));
 	}
-}
-
-class LevelSettingsLayerCB : public gd::LevelSettingsLayer {
-};
-
-inline bool(__thiscall* LevelSettingsLayer_init)(gd::LevelSettingsLayer*, gd::LevelSettingsObject*, gd::LevelEditorLayer*);
-bool __fastcall LevelSettingsLayer_initH(gd::LevelSettingsLayer* self, void*, gd::LevelSettingsObject* obj, gd::LevelEditorLayer* lel) {
-	if (!LevelSettingsLayer_init(self, obj, lel)) return false;
-
-	
-
-	return true;
 }
 
 inline void(__thiscall* CCCircleWave_draw)(gd::CCCircleWave*);
@@ -339,13 +261,96 @@ void __fastcall CustomSongWidget_updateSongInfoH(gd::CustomSongWidget* self) {
 	}
 }
 
+inline void(__thiscall* GameObject_playShineEffect)(gd::GameObject*);
+void __fastcall GameObject_playShineEffectH(gd::GameObject* self) {
+	if (!setting().onNoPortalShine) return GameObject_playShineEffect(self);
+}
+
+//class CCDirectorVisible : public cocos2d::CCDirector { // Draw Divide taken from GDMO (originally by Mat).
+//public:
+//	void calculateDeltaTime() {
+//		CCDirector::calculateDeltaTime();
+//	}
+//
+//	void setNextScene() {
+//		CCDirector::setNextScene();
+//	}
+//};
+//
+//int frameCounter = 0;
+//double frameReminder = 0;
+//
+//double getRefreshRate() {
+//	auto* app = CCApplication::sharedApplication();
+//	if (app->getVerticalSyncEnabled())
+//	{
+//		static const float refresh_rate = [] {
+//			DEVMODEA device_mode;
+//			memset(&device_mode, 0, sizeof(device_mode));
+//			device_mode.dmSize = sizeof(device_mode);
+//			device_mode.dmDriverExtra = 0;
+//
+//			if (EnumDisplaySettingsA(NULL, ENUM_CURRENT_SETTINGS, &device_mode) == 0)
+//			{
+//				return 60.f;
+//			}
+//			else
+//			{
+//				return static_cast<float>(device_mode.dmDisplayFrequency);
+//			}
+//			}();
+//		return refresh_rate;
+//	}
+//	else
+//	{
+//		return static_cast<float>(1.0 / CCDirector::sharedDirector()->getAnimationInterval());
+//	}
+//}
+//
+//inline void(__thiscall* CCDirector_drawScene)(CCDirector*);
+//void __fastcall CCDirector_drawSceneH(CCDirector* self) {
+//	if (!setting().onDrawDivide || self->getTotalFrames() < 300) {
+//		return CCDirector_drawScene(self);
+//	}
+//
+//	const float thing = getRefreshRate() / setting().fps;
+//
+//	frameCounter++;
+//
+//	if (static_cast<double>(frameCounter) + frameReminder >= thing) {
+//		frameReminder += static_cast<double>(frameCounter) - thing;
+//		frameCounter = 0;
+//		return CCDirector_drawScene(self);
+//	}
+//
+//	auto visibleDirector = static_cast<CCDirectorVisible*>(self);
+//
+//	if (!self->isPaused()) {
+//		self->getScheduler()->update(self->getDeltaTime());
+//	}
+//	if (self->getNextScene()) {
+//		visibleDirector->setNextScene();
+//	}
+//}
+
 void(__thiscall* AppDelegate_trySaveGame)(gd::AppDelegate*);
 void __fastcall AppDelegate_trySaveGameH(gd::AppDelegate* self) {
-	if (setting().onAutoSave)
-	{
-		setting().saveState();
+	if (setting().onAutoSave) setting().saveState();
+
+	if (setting().onBackupFix) {
+		if (std::filesystem::exists(CCFileUtils::sharedFileUtils()->getWritablePath() + "CCGameManager.dat.bak")) {
+			std::filesystem::remove(CCFileUtils::sharedFileUtils()->getWritablePath() + "CCGameManager.dat.bak");
+			std::cout << "Removed CCGameManager.dat.bak..." << std::endl;
+		}
+
+		if (std::filesystem::exists(CCFileUtils::sharedFileUtils()->getWritablePath() + "CCLocalLevels.dat.bak")) {
+			std::filesystem::remove(CCFileUtils::sharedFileUtils()->getWritablePath() + "CCLocalLevels.dat.bak");
+			std::cout << "Removed CCLocalLevels.dat.bak..." << std::endl;
+		}
 	}
+
 	AppDelegate_trySaveGame(self);
+
 	std::cout << "Saved..." << std::endl;
 }
 
@@ -358,8 +363,8 @@ DWORD WINAPI my_thread(void* hModule) {
 	sequence_patch((uint32_t)gd::base + 0x18bcaf, { 0xc7, 0x04, 0x24, 0x00, 0x00, 0x11, 0x43, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }); // SetGroupIDLayer::init move next free button to -145.f
 	sequence_patch((uint32_t)gd::base + 0xd9cae, { 0xf0, 0xcd, 0x60, 0x00 }); // EditorOptionsLayer Buttons Rows node
 	sequence_patch((uint32_t)gd::base + 0xd9a48, { 0xf0, 0xcd, 0x60, 0x00 }); // EditorOptionsLayer Buttons Per Row node
-	sequence_patch((uint32_t)gd::base + 0x5b803, { 0x00, 0x00, 0xa0, 0x42 }); // EditorPauseLayer::customSetup Keys button
-	sequence_patch((uint32_t)gd::base + 0x5b882, { 0x00, 0x00, 0xf0, 0x42 }); // EditorPauseLayer::customSetup Options button
+	//sequence_patch((uint32_t)gd::base + 0x5b803, { 0x00, 0x00, 0xa0, 0x42 }); // EditorPauseLayer::customSetup Keys button
+	//sequence_patch((uint32_t)gd::base + 0x5b882, { 0x00, 0x00, 0xf0, 0x42 }); // EditorPauseLayer::customSetup Options button
 
 	//AllocConsole();
 	//freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
@@ -384,9 +389,13 @@ DWORD WINAPI my_thread(void* hModule) {
 	LevelInfoLayer::mem_init();
 	PlayerObject::mem_init();
 	SetGroupIDLayer::mem_init();
+	EditLevelLayer::mem_init();
+	//LevelSettingsLayer::mem_init();
+	UILayer::mem_init();
+	//GJScaleControl::mem_init();
 
-	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x9afc0), GameManager_isIconUnlockedH, reinterpret_cast<void**>(&GameManager_isIconUnlocked));
-	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x9b2a0), GameManager_isColorUnlockedH, reinterpret_cast<void**>(&GameManager_isColorUnlocked));
+	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x9afc0), GameManager_isIconUnlockedH, reinterpret_cast<void**>(&GameManager_isIconUnlocked));
+	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x9b2a0), GameManager_isColorUnlockedH, reinterpret_cast<void**>(&GameManager_isColorUnlocked));
 
 	MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos, "?initWithTotalParticles@CCParticleSystem@cocos2d@@UAE_NI@Z")), CCParticleSystem_initWithTotalParticlesH, reinterpret_cast<void**>(&CCParticleSystem_initWithTotalParticles));
 
@@ -396,13 +405,14 @@ DWORD WINAPI my_thread(void* hModule) {
 		reinterpret_cast<void**>(&CCKeyboardDispatcher_dispatchKeyboardMSG));
 
 	MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos, "?initWithDuration@CCTransitionScene@cocos2d@@UAE_NMPAVCCScene@2@@Z")), CCTransitionScene_initWithDurationH, reinterpret_cast<void**>(&CCTransitionScene_initWithDuration));
+
+	//MH_CreateHook(GetProcAddress((HMODULE)cocos, "?drawScene@CCDirector@cocos2d@@QAEXXZ"), CCDirector_drawSceneH, (void**)&CCDirector_drawScene);
+
 	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x156760), OptionsLayer_onSecretVaultH, reinterpret_cast<void**>(&OptionsLayer_onSecretVault));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x19d270), RingObject_spawnCircleH, reinterpret_cast<void**>(&RingObject_spawnCircle));
-	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x56fa0), EditLevelLayer_initH, reinterpret_cast<void**>(&EditLevelLayer_init));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xea4c0), LevelBrowserLayer_initH, reinterpret_cast<void**>(&LevelBrowserLayer_init));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x1dac0), CCTextInputNode_updateLabelH, reinterpret_cast<void**>(&CCTextInputNode_updateLabel));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xe5680), InfoLayer::initH, reinterpret_cast<void**>(&InfoLayer::init));
-	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x102270), LevelSettingsLayer_initH, reinterpret_cast<void**>(&LevelSettingsLayer_init));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xd9900), EditorOptionsLayer::initH, reinterpret_cast<void**>(&EditorOptionsLayer::init));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xfe2e0), DrawGridLayer::drawH, reinterpret_cast<void**>(&DrawGridLayer::draw));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x13bf0), CCCircleWave_drawH, reinterpret_cast<void**>(&CCCircleWave_draw));
@@ -414,6 +424,8 @@ DWORD WINAPI my_thread(void* hModule) {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x19e250), EffectGameObject_triggerObjectH, reinterpret_cast<void**>(&EffectGameObject_triggerObject));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x54010), CustomSongWidget_initH, reinterpret_cast<void**>(&CustomSongWidget_init));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x55590), CustomSongWidget_updateSongInfoH, reinterpret_cast<void**>(&CustomSongWidget_updateSongInfo));
+
+	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xb3ed0), GameObject_playShineEffectH, reinterpret_cast<void**>(&GameObject_playShineEffect));
 
 	MH_CreateHook(
 		reinterpret_cast<void*>(gd::base + 0x392a0),

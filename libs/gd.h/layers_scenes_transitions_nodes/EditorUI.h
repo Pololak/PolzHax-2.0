@@ -15,6 +15,7 @@ namespace gd {
 	class ButtonSprite;
 	class ColorChannelSprite;
 	class UndoObject;
+	class FLAlertLayerProtocol;
 
 	class GJRotationControl : public cocos2d::CCLayer {
 	public:
@@ -22,11 +23,21 @@ namespace gd {
 			reinterpret_cast<void(__fastcall*)(GJRotationControl*)>(base + 0x73fa0)(this);
 		}
 	};
-	class GJScaleControl {};
+
 	class BoomScrollLayer : public cocos2d::CCNode {};
 	class ButtonPage : public cocos2d::CCNode {};
 	class ExtendedLayer : public cocos2d::CCNode {};
 	class Slider;
+
+	class GJScaleControl : public cocos2d::CCLayer {
+	public:
+		Slider* m_slider; // 0x118
+		int m_touchID; // 0x11c
+		float m_value; // 0x120
+		bool m_snapTo1; // 0x124 
+		cocos2d::CCLabelBMFont* m_label; // 0x128
+		GJScaleControlDelegate* m_delegate; // 0x12ñ
+	};
 
 	enum class EditCommand {};
 
@@ -50,9 +61,9 @@ namespace gd {
 		}
 	};
 
-	class EditorPauseLayer : public CCBlockLayer {
+	class EditorPauseLayer : public CCBlockLayer, public FLAlertLayerProtocol {
 	public:
-		PAD(8)
+		PAD(4)
 		CCMenuItemSpriteExtra* m_audioOnBtn; // 0x1a0
 		CCMenuItemSpriteExtra* m_audioOffBtn; // 0x1a4
 		LevelEditorLayer* m_editorLayer; // 0x1a8
@@ -329,8 +340,6 @@ namespace gd {
 		ConfigureHSVWidget* m_hsvWidget; // 0x23c
 		PAD(16)
 
-
-
 		auto getPickerColor() { return *reinterpret_cast<cocos2d::ccColor3B*>(reinterpret_cast<uintptr_t>(m_colorPicker) + 0x140); }
 		void setPickerColor(cocos2d::ccColor3B color) {
 			// fod spent like 5 hours trying to get this working on cocos-headers, so fuck it
@@ -339,6 +348,15 @@ namespace gd {
 				"?setColorValue@CCControlColourPicker@extension@cocos2d@@UAEXABU_ccColor3B@3@@Z"
 			);
 			reinterpret_cast<void(__thiscall*)(cocos2d::extension::CCControlColourPicker*, const cocos2d::ccColor3B&)>(address)(m_colorPicker, color);
+		}
+
+		void onToggleTintMode(cocos2d::CCObject* sender) {
+			reinterpret_cast<void(__thiscall*)(ColorSelectPopup*, cocos2d::CCObject*)>(base + 0x3c6d0)(this, sender);
+		}
+
+		void updateOpacityLabel() {
+			if (this->m_opacityLabel)
+				this->m_opacityLabel->setString(cocos2d::CCString::createWithFormat("Opacity: %.02f", this->m_opacity)->getCString());
 		}
 	};
 

@@ -35,7 +35,9 @@ namespace gd {
         }
 
         void setValue(float val) {
-            this->m_touchLogic->m_thumb->setValue(val);
+            __asm movaps xmm1, val
+
+            return reinterpret_cast<void(__fastcall*)(Slider*)>(base + 0x2a920)(this);
         }
 
         void updateBar() {

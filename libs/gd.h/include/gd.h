@@ -92,6 +92,9 @@ namespace gd {
 #include "layers_scenes_transitions_nodes/LevelInfoLayer.h"
 #include "layers_scenes_transitions_nodes/CustomSongWidget.h"
 #include "layers_scenes_transitions_nodes/LevelBrowserLayer.h"
+#include "layers_scenes_transitions_nodes/EditLevelLayer.h"
+#include "layers_scenes_transitions_nodes/LevelSettingsLayer.h"
+#include "layers_scenes_transitions_nodes/OptionsLayer.h"
 
 #include "scroll_nodes/CCContentLayer.h"
 #include "scroll_nodes/CCIndexPath.h"
@@ -106,6 +109,7 @@ namespace gd {
 #include "manager_nodes/AchievementManager.h"
 #include "manager_nodes/GameLevelManager.h"
 #include "manager_nodes/GJEffectManager.h"
+#include "manager_nodes/GameStatsManager.h"
 
 #include "menu_nodes/CCMenuItemSpriteExtra.h"
 #include "menu_nodes/CCMenuItemToggler.h"

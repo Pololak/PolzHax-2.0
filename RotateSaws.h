@@ -9,6 +9,4 @@ namespace RotateSaws {
 	void resumeRotations(gd::LevelEditorLayer*);
 	void beginRotateSaw(gd::GameObject*);
 	void stopRotateSaw(gd::GameObject*);
-	bool shouldRotateSaw();
-	void enableRotations(bool);
 }

@@ -20,19 +20,19 @@ public:
     /**
     @brief    Run the message loop.
     */
-    RT_REMOVE(  virtual int run();  )
-    RT_ADD(     virtual void gameDidSave(); )
+    RT_REMOVE(virtual int run(); )
+        RT_ADD(virtual void gameDidSave(); )
 
-    /**
-    @brief    Get current applicaiton instance.
-    @return Current application instance pointer.
-    */
-    static CCApplication* sharedApplication();
+        /**
+        @brief    Get current applicaiton instance.
+        @return Current application instance pointer.
+        */
+        static CCApplication* sharedApplication();
 
     /* override functions */
     virtual void setAnimationInterval(double interval);
     virtual ccLanguageType getCurrentLanguage();
-    
+
     /**
      @brief Get target platform
      */
@@ -40,39 +40,42 @@ public:
 
     RT_ADD(
         virtual void openURL(const char* url);
-        virtual int run();
-        virtual void setupGLView();
-        virtual void platformShutdown();
-        void toggleVerticalSync(bool);
-    )
+    virtual int run();
+    virtual void setupGLView();
+    virtual void platformShutdown();
+    void toggleVerticalSync(bool);
+    bool getVerticalSyncEnabled() const;
+        )
+
+        /**
+         *  Sets the Resource root path.
+         *  @deprecated Please use CCFileUtils::sharedFileUtils()->setSearchPaths() instead.
+         */
+        CC_DEPRECATED_ATTRIBUTE void setResourceRootPath(const std::string& rootResDir);
 
     /**
-     *  Sets the Resource root path.
-     *  @deprecated Please use CCFileUtils::sharedFileUtils()->setSearchPaths() instead.
-     */
-    CC_DEPRECATED_ATTRIBUTE void setResourceRootPath(const std::string& rootResDir);
-
-    /** 
      *  Gets the Resource root path.
-     *  @deprecated Please use CCFileUtils::sharedFileUtils()->getSearchPaths() instead. 
+     *  @deprecated Please use CCFileUtils::sharedFileUtils()->getSearchPaths() instead.
      */
     CC_DEPRECATED_ATTRIBUTE const std::string& getResourceRootPath(void);
 
     void setStartupScriptFilename(const std::string& startupScriptFile);
+
+    bool getControllerConnected() const;
 
     const std::string& getStartupScriptFilename(void)
     {
         return m_startupScriptFilename;
     }
 
-protected:
+public:
     HINSTANCE           m_hInstance;
     HACCEL              m_hAccelTable;
     LARGE_INTEGER       m_nAnimationInterval;
     std::string         m_resourceRootPath;
     std::string         m_startupScriptFilename;
 
-    static CCApplication * sm_pSharedApplication;
+    static CCApplication* sm_pSharedApplication;
 };
 
 NS_CC_END
