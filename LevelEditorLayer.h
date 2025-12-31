@@ -29,7 +29,14 @@ namespace LevelEditorLayer {
 	inline void(__thiscall* removeObject)(gd::LevelEditorLayer*, gd::GameObject*, bool);
 	void __fastcall removeObjectH(gd::LevelEditorLayer*, void*, gd::GameObject*, bool);
 
+	inline gd::GameObject*(__thiscall* addObjectFromString)(gd::LevelEditorLayer*, std::string);
+	gd::GameObject* __fastcall addObjectFromStringH(gd::LevelEditorLayer*, void*, std::string);
+
+	inline gd::GameObject*(__thiscall* createObject)(gd::LevelEditorLayer*, int, CCPoint);
+	gd::GameObject* __fastcall createObjectH(gd::LevelEditorLayer*, void*, int, CCPoint);
+
 	void updatePlayerColors(gd::LevelEditorLayer*);
+	void updateOrientedHitboxes(gd::LevelEditorLayer*);
 	
 	void mem_init();
 }
@@ -37,4 +44,7 @@ namespace LevelEditorLayer {
 namespace DrawGridLayer {
 	inline void(__thiscall* draw)(gd::DrawGridLayer*);
 	void __fastcall drawH(gd::DrawGridLayer*);
+
+	inline void(__thiscall* portalLineObject)();
+	void __fastcall portalLineObjectH();
 }

@@ -20,11 +20,11 @@ namespace gd {
         cocos2d::CCDictionary *m_activeDownloads;
         cocos2d::CCDictionary *m_activeUploads;
 
-        inline static GameLevelManager* sharedState() {
+        static GameLevelManager* sharedState() {
             return reinterpret_cast<GameLevelManager * (__stdcall*)()>(gd::base + 0x7e830)();
         }
 
-        inline static gd::GJGameLevel* createNewLevel() {
+        static gd::GJGameLevel* createNewLevel() {
             return reinterpret_cast<gd::GJGameLevel * (__stdcall*)()>(gd::base + 0x7fa40)();
         }
 
@@ -39,6 +39,10 @@ namespace gd {
         const char* getLevelKey(int levelID) {
             return cocos2d::CCString::createWithFormat("%i", levelID)->getCString();
         }
+
+        //void saveLevel(GJGameLevel* level) {
+        //    reinterpret_cast<void(__thiscall*)(GameLevelManager*, GJGameLevel*)>(base + 0x)
+        //}
     };
 }
 

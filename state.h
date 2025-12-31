@@ -37,6 +37,7 @@ struct SettingStruct {
 	bool onTextLength;
 	bool onTheVault;
 
+	bool onAccuratePercentage; int percentageDigits = 0;
 	bool onAlwaysNewBest;
 	bool onShowCoinsUncollected;
 	bool onPracticeCoins;
@@ -113,6 +114,7 @@ struct SettingStruct {
 	float undeafenPercent = 100.f;
 	bool onAutoKill;
 	float killPercentage = 50.f;
+	bool onAutoPickupCoins;
 	bool onBallRotatingBugFix;
 	bool onCheckpointLagFix;
 	bool onConfirmExit;
@@ -158,6 +160,24 @@ struct SettingStruct {
 	bool onSpeedhack;
 	bool onSpeedhackMusic;
 	bool onClassicMode;
+
+	float labelsOpacity = 1.f;
+	float labelsScale = 1.f;
+	int labelsFont = 0;
+	bool onHideLabels;
+	//
+	bool onCheatIndicator;
+	bool onMessageLabel; std::string message;
+	bool onFPSCounter;
+	bool onCPSCounter;
+	bool onNoclipAccuracy;
+	bool onNoclipDeaths;
+	bool onClockLabel;
+	bool onSessionTime;
+	bool onBestRunLabel;
+	bool onAttemptsLabel;
+	bool onJumpsLabel;
+	bool onMetaLabel;
 
 	bool onSelectFilter;
 	bool onExtraObjectInfo;
@@ -209,6 +229,8 @@ struct SettingStruct {
 	int g_priority = 2;
 	bool onThreadPriority;
 	bool onBackupFix;
+
+	int g_altMenuKey;
 };
 
 LayersStruct& layers();
@@ -230,6 +252,7 @@ DEF_SCHEMA(
 	onSliderLimit,
 	onTextLength,
 
+	onAccuratePercentage, percentageDigits,
 	onAlwaysNewBest,
 	onShowCoinsUncollected,
 	onPracticeCoins,
@@ -306,6 +329,7 @@ DEF_SCHEMA(
 	undeafenPercent,
 	onAutoKill,
 	killPercentage,
+	onAutoPickupCoins,
 	onBallRotatingBugFix,
 	onConfirmExit,
 	onCorrectiveMusicSync,
@@ -349,6 +373,11 @@ DEF_SCHEMA(
 	onSpeedhackMusic,
 	onClassicMode,
 
+	labelsOpacity,
+	labelsScale,
+	labelsFont,
+	onHideLabels,
+
 	onSelectFilter,
 	onExtraObjectInfo,
 	onUnusedObjects,
@@ -391,5 +420,6 @@ DEF_SCHEMA(
 	g_p2Click,
 	g_priority,
 	onThreadPriority,
-	onBackupFix
+	onBackupFix,
+	g_altMenuKey
 )

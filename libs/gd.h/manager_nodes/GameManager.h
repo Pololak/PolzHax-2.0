@@ -144,7 +144,7 @@ namespace gd {
 		}
 		void reloadAll(bool bSwitch, bool bFullscreen, bool bReloadedInSession) {
 			return reinterpret_cast<void(__thiscall*)(GameManager*, bool, bool, bool)>(
-				base + 0xCE950
+				base + 0xa2f70
 				)(this, bSwitch, bFullscreen, bReloadedInSession);
 		}
 		bool getGameVariable(const char* key) {

@@ -4,30 +4,31 @@
 
 #include "state.h"
 #include "RotateSaws.h"
+#include "utils.hpp"
 
 bool __fastcall LevelEditorLayer::initH(gd::LevelEditorLayer* self, void*, gd::GJGameLevel* level) {
 	if (!LevelEditorLayer::init(self, level)) return false;
 
-	if (setting().onHitboxBugFix) {
-		if (self->m_levelSections) {
-			for (int i = 0; i <= self->m_levelSections->count(); i++) {
-				if (i < 0) continue;
-				if (i >= self->m_levelSections->count()) break;
+	//if (setting().onHitboxBugFix) {
+	//	if (self->m_levelSections) {
+	//		for (int i = 0; i <= self->m_levelSections->count(); i++) {
+	//			if (i < 0) continue;
+	//			if (i >= self->m_levelSections->count()) break;
 
-				auto objectAtIndex = self->m_levelSections->objectAtIndex(i);
-				auto objArr = reinterpret_cast<CCArray*>(objectAtIndex);
+	//			auto objectAtIndex = self->m_levelSections->objectAtIndex(i);
+	//			auto objArr = reinterpret_cast<CCArray*>(objectAtIndex);
 
-				for (int j = 0; j < objArr->count(); j++) {
-					auto obj = reinterpret_cast<gd::GameObject*>(objArr->objectAtIndex(j));
-					if (obj && obj->canRotateFree()) {
-						if ((obj->getRotation() / 90.f) != 0.f) {
-							obj->calculateOrientedBox();
-						}
-					}
-				}
-			}
-		}
-	}
+	//			for (int j = 0; j < objArr->count(); j++) {
+	//				auto obj = reinterpret_cast<gd::GameObject*>(objArr->objectAtIndex(j));
+	//				if (obj && obj->canRotateFree()) {
+	//					if ((obj->getRotation() / 90.f) != 0.f) {
+	//						obj->calculateOrientedBox();
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 	auto playerDrawNode = CCDrawNode::create();
 	self->m_objectLayer->addChild(playerDrawNode, 1000, 124);
@@ -108,11 +109,47 @@ void LevelEditorLayer::updatePlayerColors(gd::LevelEditorLayer* self) {
 	self->m_player2->updateGlowColor();
 }
 
-//void __fastcall LevelEditorLayer::onStopPlaytestH(gd::LevelEditorLayer* self) {
-//	LevelEditorLayer::onStopPlaytest(self);
+// Taken from Zmx https://github.com/qimiko/gdps-public/blob/238b71e9f3cd8fdf855556ce4cc7c498f22cf3c0/src/hooks/LevelEditorLayer.cpp#L153
+
+//gd::GameObject* __fastcall LevelEditorLayer::addObjectFromStringH(gd::LevelEditorLayer* self, void*, std::string obj) {
+//	auto object = LevelEditorLayer::addObjectFromString(self, obj);
 //
-//	self->m_editorUI->m_currentGroupLabel->setVisible(false);
+//	if (object && object->canRotateFree() && object->m_objectRadius <= 0.f) {
+//		object->calculateOrientedBox();
+//	}
+//
+//	return object;
 //}
+//
+//gd::GameObject* __fastcall LevelEditorLayer::createObjectH(gd::LevelEditorLayer* self, void*, int id, CCPoint pos) {
+//	auto object = LevelEditorLayer::createObject(self, id, pos);
+//
+//	if (object && object->canRotateFree() && object->m_objectRadius <= 0.f) {
+//		object->calculateOrientedBox();
+//	}
+//
+//	return object;
+//}
+
+void LevelEditorLayer::updateOrientedHitboxes(gd::LevelEditorLayer* self) {
+	if (setting().onHitboxBugFix) {
+		for (auto section : CCArrayExt<cocos2d::CCArray>(self->m_levelSections)) {
+			for (auto object : CCArrayExt<gd::GameObject*>(section)) {
+				if (object && object->canRotateFree()) {
+					if ((object->getRotation() / 90.f) != 0.f) {
+						object->calculateOrientedBox();
+					}
+				}
+			}
+		}
+	}
+}
+
+void __fastcall LevelEditorLayer::onStopPlaytestH(gd::LevelEditorLayer* self) {
+	LevelEditorLayer::onStopPlaytest(self);
+
+	LevelEditorLayer::updateOrientedHitboxes(self);
+}
 
 void __fastcall DrawGridLayer::drawH(gd::DrawGridLayer* self) {
 	DrawGridLayer::draw(self);
@@ -159,6 +196,18 @@ void __fastcall DrawGridLayer::drawH(gd::DrawGridLayer* self) {
 	}
 }
 
+//gd::GameObject* obj;
+//
+//void __fastcall DrawGridLayer::portalLineObjectH() {
+//	__asm {
+//		mov obj, eax
+//	}
+//
+//	//switch (obj->m_objectID) {
+//	//	case 13: ccDrawColor4B(255, 150, 255, 255); break;
+//	//}
+//}
+
 void LevelEditorLayer::mem_init() {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xed990), LevelEditorLayer::initH, reinterpret_cast<void**>(&LevelEditorLayer::init));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xf18b0), LevelEditorLayer::updateVisibilityH, reinterpret_cast<void**>(&LevelEditorLayer::updateVisibility));
@@ -167,7 +216,9 @@ void LevelEditorLayer::mem_init() {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xfa670), LevelEditorLayer::onPlaytestH, reinterpret_cast<void**>(&LevelEditorLayer::onPlaytest));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xfadd0), LevelEditorLayer::onResumePlaytestH, reinterpret_cast<void**>(&LevelEditorLayer::onResumePlaytest));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xfad20), LevelEditorLayer::onPausePlaytestH, reinterpret_cast<void**>(&LevelEditorLayer::onPausePlaytest));
-	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xfafa0), LevelEditorLayer::onStopPlaytestH, reinterpret_cast<void**>(&LevelEditorLayer::onStopPlaytest));
+	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xfafa0), LevelEditorLayer::onStopPlaytestH, reinterpret_cast<void**>(&LevelEditorLayer::onStopPlaytest));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xf1040), LevelEditorLayer::addSpecialH, reinterpret_cast<void**>(&LevelEditorLayer::addSpecial));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xf0510), LevelEditorLayer::removeObjectH, reinterpret_cast<void**>(&LevelEditorLayer::removeObject));
+
+	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0xff09d), DrawGridLayer::portalLineObjectH, reinterpret_cast<void**>(&DrawGridLayer::portalLineObject));
 }

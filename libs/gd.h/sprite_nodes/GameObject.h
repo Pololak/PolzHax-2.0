@@ -200,7 +200,7 @@ namespace gd {
 		}
 
 		void calculateOrientedBox() {
-			return reinterpret_cast<void(__fastcall*)(GameObject*)>(base + 0xb7b30)(this);
+			reinterpret_cast<void(__fastcall*)(GameObject*)>(base + 0xb7b30)(this);
 		}
 
 		void setObjectColor(const cocos2d::ccColor3B& color) {
@@ -236,6 +236,10 @@ namespace gd {
 
 		void setRScale(float scale) {
 			reinterpret_cast<void(__thiscall*)(GameObject*, float)>(base + 0xb1c40)(this, scale);
+		}
+
+		void destroyObject() {
+			reinterpret_cast<void(__fastcall*)(GameObject*)>(base + 0xb2340)(this);
 		}
 	};
 

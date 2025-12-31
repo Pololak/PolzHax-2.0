@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <cocos2d.h>
 #include "imgui-hook.hpp"
+#include "../../state.h"
 
 using namespace cocos2d;
 
@@ -120,7 +121,7 @@ void __fastcall CCEGLView_pollEvents_H(CCEGLView* self) {
                     blockInput = true;
             }
         }
-        else if (msg.message == WM_KEYDOWN && (msg.wParam == VK_F1 || msg.wParam == VK_OEM_3 || msg.wParam == VK_TAB)) {
+        else if (msg.message == WM_KEYDOWN && (msg.wParam == VK_F1 || msg.wParam == VK_OEM_3 || msg.wParam == VK_TAB || msg.wParam == setting().g_altMenuKey)) {
             // std::cout << "key is " << std::hex << static_cast<unsigned>(msg.wParam) << std::endl;
             g_toggleCallback();
         }

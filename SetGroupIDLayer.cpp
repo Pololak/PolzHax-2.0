@@ -108,16 +108,22 @@ protected:
 
 	virtual void textChanged(gd::CCTextInputNode* input) override {
 		if (input == m_editorLayerInput) {
-			m_parent->m_editorLayer = std::atoi(m_editorLayerInput->getString());
-			m_parent->updateEditorLayerID();
+			if (!(std::string(input->getString()).find("Mixed") != std::string::npos)) {
+				m_parent->m_editorLayer = std::atoi(input->getString());
+				m_parent->updateEditorLayerID();
+			}
 		}
 		else if (input == m_editorLayer2Input) {
-			m_parent->m_editorLayer2 = std::atoi(m_editorLayer2Input->getString());
-			m_parent->updateEditorLayerID2();
+			if (!(std::string(input->getString()).find("Mixed") != std::string::npos)) {
+				m_parent->m_editorLayer2 = std::atoi(input->getString());
+				m_parent->updateEditorLayerID2();
+			}
 		}
 		else if (input == m_zOrderInput) {
-			m_parent->m_zOrder = std::atoi(m_zOrderInput->getString());
-			m_parent->updateZOrder();
+			if (!(std::string(input->getString()).find("Mixed") != std::string::npos)) {
+				m_parent->m_zOrder = std::atoi(input->getString());
+				m_parent->updateZOrder();
+			}
 		}
 	}
 
@@ -127,13 +133,14 @@ public:
 	gd::CCTextInputNode* m_zOrderInput;
 
 	void updateInputNode() {
-		m_editorLayerInput->setString(std::to_string(m_parent->m_editorLayer).c_str());
-		m_editorLayer2Input->setString(std::to_string(m_parent->m_editorLayer2).c_str());
-		m_zOrderInput->setString(std::to_string(m_parent->m_zOrder).c_str());
+		if (m_parent->m_editorLayer == -1) m_editorLayerInput->setString("Mixed");
+		else m_editorLayerInput->setString(std::to_string(m_parent->m_editorLayer).c_str());
 
-		if (m_parent->m_editorLayer < 0) m_editorLayerInput->setString("Mixed");
-		if (m_parent->m_editorLayer2 < 0) m_editorLayer2Input->setString("Mixed");
+		if (m_parent->m_editorLayer2 == -1) m_editorLayer2Input->setString("Mixed");
+		else m_editorLayer2Input->setString(std::to_string(m_parent->m_editorLayer2).c_str());
+
 		if (m_parent->m_zOrder == -1000) m_zOrderInput->setString("Mixed");
+		else m_zOrderInput->setString(std::to_string(m_parent->m_zOrder).c_str());
 	}
 
 	static CustomInputs* create(gd::SetGroupIDLayer* parent) {

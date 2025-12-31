@@ -93,6 +93,7 @@ namespace EditorUI {
 	void __fastcall onStopPlaytestH(gd::EditorUI*, void*, CCObject*);
 
 	void updateObjectHitbox(gd::EditorUI*);
+	int editorLayerForArray(CCArray*, bool);
 
 	class Callback : public gd::EditorUI {
 	public:
@@ -102,6 +103,8 @@ namespace EditorUI {
 
 		void onNextFreeEditorLayer(CCObject*);
 		void onAllEditorLayer(CCObject*);
+
+		void onGoToLayer(CCObject*);
 	};
 
 	void mem_init();

@@ -38,10 +38,8 @@ ImVec4 color6;
 bool oneX = true;
 
 void update_fps_bypass() {
-	const auto value = setting().onFPSBypass ? setting().fps : 60.f;
-	static const auto addr = cocos_symbol<&CCApplication::setAnimationInterval>("?setAnimationInterval@CCApplication@cocos2d@@UAEXN@Z");
-	addr(CCApplication::sharedApplication(), 1.0 / value);
-	CCDirector::sharedDirector()->setAnimationInterval(1.0 / value);
+	float value = 1.f / (setting().onFPSBypass ? setting().fps : 60.f);
+	CCDirector::sharedDirector()->setAnimationInterval(value);
 }
 
 void cheatDec()
@@ -106,7 +104,27 @@ float specialsColor[3];
 float levelBGColor[3];
 float levelGColor[3];
 
-const char* const priorities[] = { "Highest", "High", "Normal", "Low", "Lowest" };
+const char* priorities[] = { "Highest", "High", "Normal", "Low", "Lowest" };
+
+const char* labelFonts[] = {
+	"Big Font",
+	"Chat Font",
+	"TRS Million",
+	"Star Wars",
+	"Relish Gargler",
+	"Joystix Monospace",
+	"GoodDog Plain",
+	"Dancing Script",
+	"Stencil",
+	"Xirod",
+	"Minecraft",
+	"Mario",
+	"Ketchum"
+};
+
+const char* percentageDigits[] = { "1 decimal place", "2 decimal places", "3 decimal places", "4 decimal places" };
+
+std::string searchString = "";
 
 void imgui_render() {
 	auto playLayer = gd::GameManager::sharedState()->m_playLayer;
@@ -185,6 +203,10 @@ void imgui_render() {
 
 		if (ImGui::Begin("Speedhack", nullptr)) {
 			ImGui::SetWindowPos({ level_xPos, addingSpeedhackY });
+		}
+
+		if (ImGui::Begin("Status", nullptr)) {
+			ImGui::SetWindowPos({ universal_xPos, 5 });
 		}
 
 		// Bypass
@@ -702,6 +724,8 @@ void imgui_render() {
 			sequence_patch((uint32_t)gd::base + 0x17d981, { 0xe8, 0x2a, 0x3f, 0xea, 0xff });
 		}
 
+		if (setting().onAutoPickupCoins) cheatAdd();
+
 		if (setting().onNoclip) cheatAdd();
 
 		if (setting().onHitboxes) cheatAdd();
@@ -897,7 +921,7 @@ void imgui_render() {
 		if (ImGui::Begin("PolzHax", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar)); {
 			ImGui::SetWindowFontScale(setting().UISize);
 
-			ImGui::Text("2.011 - v1.0.3");
+			ImGui::Text("2.011 - v1.0.32");
 
 			ImGui::Checkbox("Auto Save", &setting().onAutoSave);
 			ImGui::SameLine(0.f, 7.5f);
@@ -905,6 +929,12 @@ void imgui_render() {
 				setting().saveState();
 				gd::FLAlertLayer::create(nullptr, "Saved", "OK", nullptr, 300.f, "Your hack state is saved.")->show();
 			}
+
+			ImGui::HotKey("Menu Hotkey", setting().g_altMenuKey, 0.f, ImVec2(90, 0));
+
+			//if (ImGui::InputTextWithHint("##searchInput", "Search", &searchString)) {
+
+			//}
 
 			if (ImGui::Checkbox("Thread Priority", &setting().onThreadPriority)) {
 				if (setting().onThreadPriority) {
@@ -915,12 +945,10 @@ void imgui_render() {
 				}
 			}
 			ImGui::SetNextItemWidth(185.f);
-			ImGui::Combo("##thrprio", &setting().g_priority, priorities, 5);
-			if (ImGui::IsItemDeactivatedAfterEdit()) {
+			if (ImGui::Combo("##thrprio", &setting().g_priority, priorities, 5)) {
 				updatePriority(setting().onThreadPriority ? setting().g_priority : 2);
 			}
 			
-
 			char buffer[256];
 			sprintf(buffer, "Extensions: %d", dllNames.size());
 			if (ImGui::TreeNode(buffer)) {
@@ -1120,6 +1148,28 @@ void imgui_render() {
 				auto optionsLayer = gd::OptionsLayer::create();
 				optionsLayer->showLayer(true);
 				CCDirector::sharedDirector()->getRunningScene()->addChild(optionsLayer, CCDirector::sharedDirector()->getRunningScene()->getHighestChildZ() + 1, 0x725);
+			}
+
+			static bool showFirstBtn = true;
+			static bool showSecondBtn = false;
+			if (showFirstBtn) {
+				if (ImGui::Button("Refresh Textures", ImVec2(185, 0))) {
+					showFirstBtn = false;
+					showSecondBtn = true;
+				}
+			}
+			if (showSecondBtn) {
+				if (ImGui::Button("Cancel", ImVec2(90, 0))) {
+					showFirstBtn = true;
+					showSecondBtn = false;
+				}
+				ImGui::SameLine(0.f, 5.f);
+				if (ImGui::Button("Confirm", ImVec2(90, 0))) {
+					showFirstBtn = true;
+					showSecondBtn = false;
+
+					gd::GameManager::sharedState()->reloadAll(false, false, true);
+				}
 			}
 
 			if (ImGui::Button("Resources", ImVec2(90, 0))) {
@@ -1853,6 +1903,15 @@ void imgui_render() {
 				ImGui::TreePop();
 			}
 
+			if (ImGui::Checkbox("Auto Pickup Coins", &setting().onAutoPickupCoins)) {
+				if (setting().onAutoPickupCoins) {
+					cheatAdd();
+				}
+				else {
+					cheatDec();
+				}
+			}
+
 			ImGui::Checkbox("Ball Rotation Bug Fix", &setting().onBallRotatingBugFix);
 			if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > 0.5f)
 				ImGui::SetTooltip("Fixes that ball rotation bug when entering a portal mid ball animation.");
@@ -2288,6 +2347,143 @@ void imgui_render() {
 				update_speed_hack();
 			}
 		}
+
+		if (setting().onDeveloperMode) {
+			ImGui::SetNextWindowSize(ImVec2(200, 0));
+			if (ImGui::Begin("Status", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar)); {
+				ImGui::SetNextItemWidth(90.f);
+				ImGui::DragFloat("##labelsOpacity", &setting().labelsOpacity, .1f, 0.f, 1.f, "Opacity: %.1fx");
+				ImGui::SameLine(0.f, 5.f);
+				ImGui::SetNextItemWidth(90.f);
+				ImGui::DragFloat("##labelsScale", &setting().labelsScale, .1f, .1f, 3.f, "Scale: %.1fx");
+
+				ImGui::SetNextItemWidth(185.f);
+				if (ImGui::Combo("##labelsFont", &setting().labelsFont, labelFonts, IM_ARRAYSIZE(labelFonts), IM_ARRAYSIZE(labelFonts))) {
+					//if (playLayer) {
+					//	auto cheatIndicator = static_cast<CCLabelBMFont*>(playLayer->m_uiLayer->getChildByTag(4900));
+					//	cheatIndicator->setFntFile(keyToFont(setting().labelsFont).c_str());
+					//}
+				}
+
+				ImGui::Checkbox("Hide All", &setting().onHideLabels);
+
+				ImGui::Checkbox("Cheat Indicator", &setting().onCheatIndicator);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##ciSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("Message", &setting().onMessageLabel);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##msgSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+					ImGui::SetNextItemWidth(185.f);
+					ImGui::InputText("##message", &setting().message);
+
+					ImGui::TreePop();
+				}
+
+				if (ImGui::Checkbox("Attempt", &setting().onAttemptsLabel)) {
+					if (setting().onAttemptsLabel) {
+
+					}
+					else {
+
+					}
+				}
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##attsSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("Jumps", &setting().onJumpsLabel);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##jmpSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("Session Time", &setting().onSessionTime);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##stimeSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("Best Run", &setting().onBestRunLabel);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##brunSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("Clock", &setting().onClockLabel);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##clkSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("FPS Counter", &setting().onFPSCounter);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##fpsSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("CPS Counter", &setting().onCPSCounter);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##cpsSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("Noclip Accuracy", &setting().onNoclipAccuracy);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##naccSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("Noclip Deaths", &setting().onNoclipDeaths);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##ndthsSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Checkbox("Meta", &setting().onMetaLabel);
+				ImGui::SameLine(170.f);
+				if (ImGui::TreeNodeEx("##metaSettings", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+
+
+
+					ImGui::TreePop();
+				}
+			}
+		}
 	}
 
 	update_fps_bypass();
@@ -2310,6 +2506,7 @@ void imgui_init() {
 	auto* colors = ImGui::GetStyle().Colors;
 
 	ImGui::GetStyle().WindowTitleAlign = ImVec2(0.5f, 0.5f);
+	ImGui::GetStyle().WindowBorderSize = 0;
 
 	color1.x = setting().Overlaycolor[0];
 	color1.y = setting().Overlaycolor[1];

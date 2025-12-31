@@ -91,17 +91,23 @@ namespace RotateSaws {
 void __fastcall LevelEditorLayer::onPlaytestH(gd::LevelEditorLayer* self) {
 	LevelEditorLayer::onPlaytest(self);
 
+	LevelEditorLayer::updateOrientedHitboxes(self);
+
 	if (setting().onRotateSaws) RotateSaws::beginRotations(self);
 }
 
 void __fastcall LevelEditorLayer::onResumePlaytestH(gd::LevelEditorLayer* self) {
 	LevelEditorLayer::onResumePlaytest(self);
 
+	LevelEditorLayer::updateOrientedHitboxes(self);
+
 	if (setting().onRotateSaws) RotateSaws::resumeRotations(self);
 }
 
 void __fastcall LevelEditorLayer::onPausePlaytestH(gd::LevelEditorLayer* self) {
 	LevelEditorLayer::onPausePlaytest(self);
+
+	LevelEditorLayer::updateOrientedHitboxes(self);
 
 	if (setting().onRotateSaws) RotateSaws::pauseRotations(self);
 }

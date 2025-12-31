@@ -14,17 +14,17 @@ namespace gd {
         LevelUpdateDelegate,
         RateLevelDelegate,
         LikeItemDelegate,
-        FLAlertLayerProtocol,
+        public FLAlertLayerProtocol,
         LevelDeleteDelegate,
         NumberInputDelegate {
     public:
-        PAD(0x4)
+        bool m_willExitScene; // 0x134
         cocos2d::CCMenu* m_playButtonMenu; // 0x138
         GJGameLevel* m_level; // 0x13c
         cocos2d::CCArray* m_coinsSprites; // 0x140
         PAD(0x4)
         CCMenuItemSpriteExtra* m_likeBtn; // 0x148
-        CCMenuItemSpriteExtra* m_rateStarsBtn; // 0x14c
+        CCMenuItemSpriteExtra* m_starRateBtn; // 0x14c
         PAD(0x4)
         cocos2d::CCLabelBMFont* m_lengthLabel; // 0x154
         cocos2d::CCLabelBMFont* m_downloadsLabel; // 0x158

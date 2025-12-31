@@ -11,6 +11,86 @@
 gd::EditorUI* editorUI = nullptr;
 EditorLayerInput* m_editorLayerInput = nullptr;
 
+void updateInputNode();
+
+// 2.1 func
+// decomp taken from 2.2074 geode bindings
+// https://github.com/geode-sdk/bindings/blob/7c92e5e02de296f31bfb1e89909553c5b7ca37af/bindings/2.2074/GeometryDash.bro#L6723
+int EditorUI::editorLayerForArray(cocos2d::CCArray* objects, bool layer2) {
+	if (!objects) return 0;
+
+	auto previousLayer = -1;
+	auto currentLayer = -1;
+
+	for (int i = 0; i < objects->count(); i++) {
+		auto obj = reinterpret_cast<gd::GameObject*>(objects->objectAtIndex(i));
+
+		currentLayer = layer2 ? obj->m_editorLayer2 : obj->m_editorLayer;
+
+		if (previousLayer != -1 && previousLayer != currentLayer) return 0;
+
+		previousLayer = currentLayer;
+	}
+
+	return currentLayer != -1 ? currentLayer : 0;
+}
+
+void EditorUI::Callback::onGoToLayer(CCObject*) { // decomp from 2.1
+	if ((this->m_selectedObject == nullptr) && this->getSelectedObjects()->count() == 0) return;
+
+	int uVar2 = 0;
+	int uVar3 = 0;
+	int uVar4 = 0;
+	int uVar5 = 0;
+	int uVar6 = 0;
+
+	auto obj = this->m_selectedObject;
+	uVar6 = this->m_editorLayer->m_groupIDFilter;
+
+	if (obj == nullptr) {
+		uVar2 = editorLayerForArray(this->getSelectedObjects(), false);
+		uVar3 = editorLayerForArray(this->getSelectedObjects(), true);
+	}
+	else {
+		uVar2 = obj->m_editorLayer;
+		uVar3 = obj->m_editorLayer2;
+	}
+
+	uVar5 = 1 - uVar2;
+
+	if (1 < uVar2) {
+		uVar5 = 0;
+	}
+	if (uVar3 == 0) {
+		uVar5 = 0;
+	}
+	else {
+		uVar5 = uVar5 & 1;
+	}
+	uVar4 = uVar3;
+	if (uVar5 != 0) {
+		uVar4 = 0;
+		uVar2 = uVar3;
+	}
+	uVar3 = uVar4;
+	if (uVar4 != 0) {
+		uVar3 = 1;
+	}
+	if (uVar6 == uVar4) {
+		uVar3 = 0;
+	}
+	else {
+		uVar3 = uVar3 & 1;
+	}
+	if (uVar3 != 0) {
+		uVar2 = uVar4;
+	}
+
+	this->m_editorLayer->m_groupIDFilter = uVar2;
+	this->m_currentGroupLabel->setString(CCString::createWithFormat("%i", uVar2)->getCString());
+	updateInputNode();
+}
+
 void updateInputNode() {
 	if (m_editorLayerInput) {
 		if (editorUI->m_editorLayer->m_groupIDFilter < 0) {
@@ -141,6 +221,14 @@ bool __fastcall EditorUI::initH(gd::EditorUI* self, void*, gd::LevelEditorLayer*
 	self->m_hideableUIElement->addObject(m_editorLayerInput);
 	self->addChild(m_editorLayerInput);
 	self->m_currentGroupLabel->setOpacity(0);
+
+	auto onGoToLayerSpr = CCSprite::create("GJ_goToGroupBtn_001.png");
+	onGoToLayerSpr->setScale(.75f);
+	auto onGoToGroup = gd::CCMenuItemSpriteExtra::create(onGoToLayerSpr, self, menu_selector(EditorUI::Callback::onGoToLayer));
+	onGoToGroup->setPosition(self->m_deselectBtn->getPositionX() - 84.f, self->m_deselectBtn->getPositionY() - 1.f);
+	onGoToGroup->setVisible(false);
+	onGoToGroup->setEnabled(false);
+	rightMenu->addChild(onGoToGroup, 0, 45002);
 
 	return true;
 }
@@ -411,7 +499,7 @@ void __fastcall EditorUI::moveObjectCallH(gd::EditorUI* self, void*, gd::EditCom
 void __fastcall EditorUI::transformObjectCallH(gd::EditorUI* self, void*, gd::EditCommand command) {
 	EditorUI::transformObjectCall(self, command);
 	self->updateObjectInfoLabel();
-	if (setting().onHitboxBugFix) updateObjectHitbox(self);
+	// if (setting().onHitboxBugFix) updateObjectHitbox(self);
 }
 
 bool m_isHoldingInEditor;
@@ -462,19 +550,19 @@ void __fastcall EditorUI::onStopPlaytestH(gd::EditorUI* self, void*, CCObject* o
 void __fastcall EditorUI::angleChangedH(gd::EditorUI* _self, void*, float angle) {
 	EditorUI::angleChanged(_self, angle);
 	gd::EditorUI* self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(_self) - 0x120);
-	if (setting().onHitboxBugFix) updateObjectHitbox(self);
+	// if (setting().onHitboxBugFix) updateObjectHitbox(self);
 }
 
 void __fastcall EditorUI::onPasteH(gd::EditorUI* self, void*, CCObject* sender) {
 	EditorUI::onPaste(self, sender);
-	if (setting().onHitboxBugFix) updateObjectHitbox(self);
+	// if (setting().onHitboxBugFix) updateObjectHitbox(self);
 }
 
 void __fastcall EditorUI::onDuplicateH(gd::EditorUI* self, void*, CCObject* sender) {
 	if (setting().onRotateSaws) RotateSaws::stopRotations(self->m_editorLayer);
 	EditorUI::onDuplicate(self, sender);
 	if (setting().onRotateSaws) RotateSaws::beginRotations(self->m_editorLayer);
-	if (setting().onHitboxBugFix) updateObjectHitbox(self);
+	// if (setting().onHitboxBugFix) updateObjectHitbox(self);
 }
 
 //CCArray* __fastcall EditorUI::pasteObjectsH(gd::EditorUI* self, void*, std::string objs) {
@@ -484,7 +572,7 @@ void __fastcall EditorUI::onDuplicateH(gd::EditorUI* self, void*, CCObject* send
 
 void __fastcall EditorUI::onCreateObjectH(gd::EditorUI* self, void*, int id) {
 	EditorUI::onCreateObject(self, id);
-	if (setting().onHitboxBugFix) updateObjectHitbox(self);
+	// if (setting().onHitboxBugFix) updateObjectHitbox(self);
 }
 
 void __fastcall EditorUI::updateButtonsH(gd::EditorUI* self) {
@@ -495,6 +583,12 @@ void __fastcall EditorUI::updateButtonsH(gd::EditorUI* self) {
 			btn->setVisible(false);
 			btn->setEnabled(false);
 		}
+	}
+
+	auto gtg = static_cast<gd::CCMenuItemSpriteExtra*>(static_cast<CCMenu*>(self->m_copyBtn->getParent())->getChildByTag(45002));
+	if (gtg) {
+		gtg->setVisible(self->getSelectedObjects()->count() == 1);
+		gtg->setEnabled(self->getSelectedObjects()->count() == 1);
 	}
 }
 

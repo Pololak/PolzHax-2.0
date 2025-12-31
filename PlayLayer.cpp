@@ -24,6 +24,8 @@ int smoothOut;
 bool m_deafenPressed = false;
 int m_startPercent = 0;
 
+std::vector<gd::EffectGameObject*> m_coinsToPickup;
+
 static gd::GameObject* getClosestObject(std::vector<gd::GameObject*>& vec, gd::StartPosObject* startPos) {
 	gd::GameObject* closest = nullptr;
 
@@ -223,6 +225,16 @@ bool __fastcall PlayLayer::initH(gd::PlayLayer* self, void*, gd::GJGameLevel* le
 	inPractice = false;
 	inTestmode = self->m_isTestMode;
 	smoothOut = 0;
+	checkpoints.clear();
+	m_dualPortals.clear();
+	m_gamemodePortals.clear();
+	m_miniPortals.clear();
+	m_miniPortals.clear();
+	m_speedChanges.clear();
+	m_mirrorPortals.clear();
+	m_startPositions.clear();
+	m_coinsToPickup.clear();
+
 	if (!PlayLayer::init(self, level)) return false;
 
 	auto director = CCDirector::sharedDirector();
@@ -246,18 +258,6 @@ bool __fastcall PlayLayer::initH(gd::PlayLayer* self, void*, gd::GJGameLevel* le
 	// No Wave Trail
 	self->m_player->m_hardStreak->setVisible(!setting().onNoWaveTrail);
 	self->m_player2->m_hardStreak->setVisible(!setting().onNoWaveTrail);
-
-	if (setting().onPracticeBugFix) {
-		checkpoints.clear();
-	}
-
-	m_dualPortals.clear();
-	m_gamemodePortals.clear();
-	m_miniPortals.clear();
-	m_miniPortals.clear();
-	m_speedChanges.clear();
-	m_mirrorPortals.clear();
-	m_startPositions.clear();
 
 	if (setting().onAutoSafeMode && setting().cheatsCount > 0) safeModeON(), setting().isSafeMode = true;
 	else if (!setting().onSafeMode) safeModeOFF(), setting().isSafeMode = false;
@@ -481,6 +481,15 @@ void __fastcall PlayLayer::resetLevelH(gd::PlayLayer* self) {
 	}
 
 	if (setting().onCheckpointLagFix && (self->m_isPracticeMode || self->m_isTestMode)) smoothOut = 2;
+
+	if (setting().onAutoPickupCoins) {
+		for (auto* coin : m_coinsToPickup) {
+			if (coin == nullptr) continue;
+
+			static_cast<gd::GameObject*>(coin)->destroyObject();
+			self->pickupItem(coin);
+		}
+	}
 }
 
 void __fastcall PlayLayer::togglePracticeModeH(gd::PlayLayer* self, void* edx, bool practice) {
@@ -571,6 +580,9 @@ void __fastcall PlayLayer::addObjectH(gd::PlayLayer* self, void*, gd::GameObject
 		break;
 	default: break;
 	}
+
+	if (obj->m_objectID == 142 || obj->m_objectID == 1329)
+		m_coinsToPickup.push_back(static_cast<gd::EffectGameObject*>(obj));
 }
 
 void __fastcall PlayLayer::createObjectsFromSetupH(gd::PlayLayer* self, void*, gd::string objects) {

@@ -1581,6 +1581,9 @@
     <ClInclude Include="GJScaleControl.hpp">
       <Filter>Файлы заголовков\Layers</Filter>
     </ClInclude>
+    <ClInclude Include="Labels.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -1735,6 +1738,9 @@
     </ClCompile>
     <ClCompile Include="GJScaleControl.cpp">
       <Filter>Исходные файлы\Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Labels.cpp">
+      <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

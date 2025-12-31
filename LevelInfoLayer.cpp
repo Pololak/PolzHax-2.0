@@ -1,10 +1,12 @@
 #include "LevelInfoLayer.h"
 #include "state.h"
 #include <ZipUtils.h>
+#include "utils.hpp"
 
 void LevelInfoLayer::Callback::onMoveToTop(CCObject*) {
-	auto glm = gd::GameLevelManager::sharedState();
-	std::cout << glm->m_savedLevelsDict->valueForKey(glm->getLevelKey(this->m_level->m_levelID)) << std::endl;
+	auto layer = gd::FLAlertLayer::create(this, "Move To Top", "NO", "YES", 300.f, "Move this level to the top of the saved levels list?");
+	layer->setTag(10);
+	layer->show();
 }
 
 void LevelInfoLayer::showInfoLabel(gd::LevelInfoLayer* self, gd::GJGameLevel* level) {
@@ -58,7 +60,6 @@ void LevelInfoLayer::showInfoLabel(gd::LevelInfoLayer* self, gd::GJGameLevel* le
 
 bool __fastcall LevelInfoLayer::initH(gd::LevelInfoLayer* self, void*, gd::GJGameLevel* level) {
 	if (!LevelInfoLayer::init(self, level)) return false;
-	if (setting().onCopyHack) if (self->m_copyBtn) self->m_copyBtn->setVisible(true);
 
 	auto director = CCDirector::sharedDirector();
 	auto winSize = director->getWinSize();
@@ -87,12 +88,22 @@ bool __fastcall LevelInfoLayer::initH(gd::LevelInfoLayer* self, void*, gd::GJGam
 	return true;
 }
 
-void __fastcall LevelInfoLayer::levelDownloadFinishedH(gd::LevelInfoLayer* self, void*, gd::GJGameLevel* level) {
-	LevelInfoLayer::levelDownloadFinished(self, level);
-	if (setting().onCopyHack) if (self->m_copyBtn) self->m_copyBtn->setVisible(true);
+void __fastcall LevelInfoLayer::FLAlert_ClickedH(gd::LevelInfoLayer* self, void*, gd::FLAlertLayer* alert, bool btn2) {
+	if ((alert->getTag() == 10) && btn2) {
+		auto glm = gd::GameLevelManager::sharedState();
+		glm->m_savedLevelsDict->removeObjectForKey(glm->getLevelKey(self->m_level->m_levelID));
+		glm->m_savedLevelsDict->setObject(self->m_level, glm->getLevelKey(self->m_level->m_levelID));
+	}
+	LevelInfoLayer::FLAlert_Clicked(self, alert, btn2);
 }
+
+//void __fastcall LevelInfoLayer::levelDownloadFinishedH(gd::LevelInfoLayer* self, void*, gd::GJGameLevel* level) {
+//	LevelInfoLayer::levelDownloadFinished(self, level);
+//	if (setting().onCopyHack) if (self->m_copyBtn) self->m_copyBtn->setVisible(true);
+//}
 
 void LevelInfoLayer::mem_init() {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x107740), LevelInfoLayer::initH, reinterpret_cast<void**>(&LevelInfoLayer::init));
-	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x109610), LevelInfoLayer::levelDownloadFinishedH, reinterpret_cast<void**>(&LevelInfoLayer::levelDownloadFinished));
+	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x109610), LevelInfoLayer::levelDownloadFinishedH, reinterpret_cast<void**>(&LevelInfoLayer::levelDownloadFinished));
+	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x10bc90), LevelInfoLayer::FLAlert_ClickedH, reinterpret_cast<void**>(&LevelInfoLayer::FLAlert_Clicked));
 }

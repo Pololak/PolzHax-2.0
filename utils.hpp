@@ -616,3 +616,9 @@ inline int strToInt(const char* str, bool* is = nullptr) {
 
 	return isStr ? std::atoi(str) : -1;
 }
+
+inline std::string stringToLower(std::string const& orig) {
+	auto res = orig;
+	std::transform(res.begin(), res.end(), res.begin(), [](unsigned char c) { return std::tolower(c); });
+	return res;
+}

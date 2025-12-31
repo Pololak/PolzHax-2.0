@@ -150,6 +150,10 @@ namespace gd {
 		void releaseButton(int p0, bool p1) {
 			reinterpret_cast<void(__thiscall*)(PlayLayer*, int, bool)>(base + 0x17bbb0)(this, p0, p1);
 		}
+
+		void pickupItem(GameObject* obj) {
+			reinterpret_cast<void(__thiscall*)(PlayLayer*, GameObject*)>(base + 0x179660)(this, obj);
+		}
 	};
 }
 

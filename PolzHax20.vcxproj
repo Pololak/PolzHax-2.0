@@ -173,6 +173,7 @@
     <ClInclude Include="Hitboxes.h" />
     <ClInclude Include="ImGuiUtils.hpp" />
     <ClInclude Include="InfoLayer.h" />
+    <ClInclude Include="Labels.h" />
     <ClInclude Include="LevelEditorLayer.h" />
     <ClInclude Include="LevelInfoLayer.h" />
     <ClInclude Include="FindLevelPopup.h" />
@@ -688,6 +689,7 @@
     <ClCompile Include="HSVWidgetPopup.cpp" />
     <ClCompile Include="ImGuiUtils.cpp" />
     <ClCompile Include="InfoLayer.cpp" />
+    <ClCompile Include="Labels.cpp" />
     <ClCompile Include="LevelEditorLayer.cpp" />
     <ClCompile Include="LevelInfoLayer.cpp" />
     <ClCompile Include="FindLevelPopup.cpp" />
