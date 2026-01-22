@@ -48,28 +48,14 @@ void __fastcall PauseLayer::customSetupH(gd::PauseLayer* self) {
     auto director = CCDirector::sharedDirector();
     auto winSize = director->getWinSize();
 
-    CCLabelBMFont* barText = nullptr;
-    if (self->getChildren()->count() > 20) {
-        barText = reinterpret_cast<CCLabelBMFont*>(self->getChildren()->objectAtIndex(14));
-    }
-    else {
-        barText = reinterpret_cast<CCLabelBMFont*>(self->getChildren()->objectAtIndex(11));
-    }
-    barText->setString("Bar");
-    barText->setScale(0.42f);
+    if (m_togglerMenu == nullptr) return;
 
-    auto toggleOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-    auto toggleOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-
-    auto PercentageButton = gd::CCMenuItemToggler::create(showPercentageTogglerSpr(toggleOn, toggleOff), showPercentageTogglerSpr(toggleOff, toggleOn), self, menu_selector(PauseLayer::Callback::onShowPercentage));
-    auto PercentageLabel = CCLabelBMFont::create("%", "bigFont.fnt");
-    PercentageButton->setScale(0.6f);
-    PercentageButton->setPosition({m_togglerMenu->convertToNodeSpace({(winSize.width / 2) + 155.f, +25}) });
-    PercentageLabel->setScale(0.4f);
-    PercentageLabel->setPosition({ (winSize.width / 2) + 170.5f, +25 });
-    PercentageLabel->setAnchorPoint({ 0.f, 0.5f });
-    m_togglerMenu->addChild(PercentageButton);
-    self->addChild(PercentageLabel);
+    self->createToggleButton(
+        "%",
+        menu_selector(PauseLayer::Callback::onShowPercentage),
+        !gd::GameManager::sharedState()->getGameVariable("0040"),
+        m_togglerMenu,
+        ccp(winSize.width / 2.f + 155.f, director->getScreenBottom() + 25.f));
 }
 
 void __fastcall PauseLayer::onRestartH(CCObject* object) {

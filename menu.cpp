@@ -126,6 +126,124 @@ const char* percentageDigits[] = { "1 decimal place", "2 decimal places", "3 dec
 
 std::string searchString = "";
 
+void sortTabs() {
+	float polzhax_xPos = 5.f;
+	float bypass_xPos = -1.f;
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("PolzHax", nullptr);
+		ImGui::SetWindowPos(ImVec2(5.f, 5.f));
+		bypass_xPos = polzhax_xPos + ImGui::GetWindowWidth() + 10.f;
+	}
+	float addingUtilityY = -1.f;
+	float cosmetic_xPos = -1.f;
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("Bypass", nullptr);
+		ImGui::SetWindowPos(ImVec2(bypass_xPos, 5.f));
+		cosmetic_xPos = bypass_xPos + ImGui::GetWindowWidth() + 10.f;
+		addingUtilityY = ImGui::GetWindowHeight() + 10.f;
+	}
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("Utility", nullptr);
+		ImGui::SetWindowPos(ImVec2(bypass_xPos, addingUtilityY));
+	}
+	float creator_xPos = -1.f;
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("Cosmetic", nullptr);
+		ImGui::SetWindowPos(ImVec2(cosmetic_xPos, 5.f));
+		creator_xPos = cosmetic_xPos + ImGui::GetWindowWidth() + 10.f;
+	}
+	float level_xPos = -1.f;
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("Creator", nullptr);
+		ImGui::SetWindowPos(ImVec2(creator_xPos, 5.f));
+		level_xPos = creator_xPos + ImGui::GetWindowWidth() + 10.f;
+	}
+	float universal_xPos = -1.f;
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("Level", nullptr);
+		ImGui::SetWindowPos(ImVec2(level_xPos, 5.f));
+		universal_xPos = level_xPos + ImGui::GetWindowWidth() + 10.f;
+	}
+	float addingSpeedhackY = -1.f;
+	float status_xPos = -1.f;
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("Universal", nullptr);
+		ImGui::SetWindowPos(ImVec2(universal_xPos, 5.f));
+		status_xPos = universal_xPos + ImGui::GetWindowWidth() + 10.f;
+		addingSpeedhackY = ImGui::GetWindowHeight() + 10.f;
+	}
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("Speedhack", nullptr);
+		ImGui::SetWindowPos(ImVec2(universal_xPos, addingSpeedhackY));
+	}
+	{
+		ImGui::SetWindowSize(ImVec2(200.f, 0.f));
+		ImGui::Begin("Status", nullptr);
+		ImGui::SetWindowPos(ImVec2(status_xPos, 5.f));
+	}
+
+	//float polzhax_xPos;
+	//float bypass_xPos;
+	//float cosmetic_xPos;
+	//float creator_xPos;
+	//float level_xPos;
+	//float universal_xPos;
+	//float addingSpeedhackY;
+	//float addingUtilityY;
+
+	//if (ImGui::Begin("PolzHax", nullptr)) {
+	//	ImGui::SetWindowPos({ 5,5 });
+	//	polzhax_xPos = ImGui::GetWindowWidth() + 10;
+	//}
+
+	//if (ImGui::Begin("Bypass", nullptr)) {
+	//	ImGui::SetWindowPos({ polzhax_xPos, 5 });
+	//	bypass_xPos = polzhax_xPos + ImGui::GetWindowWidth() + 5;
+	//	addingUtilityY = ImGui::GetWindowHeight() + 10;
+	//}
+
+	//if (ImGui::Begin("Utility", nullptr)) {
+	//	ImGui::SetWindowPos({ polzhax_xPos, addingUtilityY });
+	//}
+
+	//if (ImGui::Begin("Cosmetic", nullptr)) {
+	//	ImGui::SetWindowPos({ bypass_xPos, 5 });
+	//	cosmetic_xPos = bypass_xPos + ImGui::GetWindowWidth() + 5;
+	//}
+
+	//if (ImGui::Begin("Creator", nullptr)) {
+	//	ImGui::SetWindowPos({ cosmetic_xPos, 5 });
+	//	creator_xPos = cosmetic_xPos + ImGui::GetWindowWidth() + 5;
+	//}
+
+	//if (ImGui::Begin("Level", nullptr)) {
+	//	ImGui::SetWindowPos({ creator_xPos, 5 });
+	//	level_xPos = creator_xPos + ImGui::GetWindowWidth() + 5;
+	//}
+
+	//if (ImGui::Begin("Universal", nullptr)) {
+	//	ImGui::SetWindowPos({ level_xPos, 5 });
+	//	universal_xPos = level_xPos + ImGui::GetWindowWidth() + 5;
+	//	addingSpeedhackY = ImGui::GetWindowHeight() + 10;
+	//}
+
+	//if (ImGui::Begin("Speedhack", nullptr)) {
+	//	ImGui::SetWindowPos({ level_xPos, addingSpeedhackY });
+	//}
+
+	//if (ImGui::Begin("Status", nullptr)) {
+	//	ImGui::SetWindowPos({ universal_xPos, 5 });
+	//}
+}
+
 void imgui_render() {
 	auto playLayer = gd::GameManager::sharedState()->m_playLayer;
 	auto editorLayer = gd::GameManager::sharedState()->m_editorLayer;
@@ -156,58 +274,7 @@ void imgui_render() {
 		levelGColor[1] = setting().levelGColorG / 255.f;
 		levelGColor[2] = setting().levelGColorB / 255.f;
 
-		float polzhax_xPos;
-		float bypass_xPos;
-		float cosmetic_xPos;
-		float creator_xPos;
-		float level_xPos;
-		float universal_xPos;
-		float addingSpeedhackY;
-		float addingUtilityY;
-
-		if (ImGui::Begin("PolzHax", nullptr)) {
-			ImGui::SetWindowPos({ 5,5 });
-			polzhax_xPos = ImGui::GetWindowWidth() + 10;
-		}
-
-		if (ImGui::Begin("Bypass", nullptr)) {
-			ImGui::SetWindowPos({ polzhax_xPos, 5 });
-			bypass_xPos = polzhax_xPos + ImGui::GetWindowWidth() + 5;
-			addingUtilityY = ImGui::GetWindowHeight() + 10;
-		}
-
-		if (ImGui::Begin("Utility", nullptr)) {
-			ImGui::SetWindowPos({ polzhax_xPos, addingUtilityY });
-		}
-
-		if (ImGui::Begin("Cosmetic", nullptr)) {
-			ImGui::SetWindowPos({ bypass_xPos, 5 });
-			cosmetic_xPos = bypass_xPos + ImGui::GetWindowWidth() + 5;
-		}
-
-		if (ImGui::Begin("Creator", nullptr)) {
-			ImGui::SetWindowPos({ cosmetic_xPos, 5 });
-			creator_xPos = cosmetic_xPos + ImGui::GetWindowWidth() + 5;
-		}
-
-		if (ImGui::Begin("Level", nullptr)) {
-			ImGui::SetWindowPos({ creator_xPos, 5 });
-			level_xPos = creator_xPos + ImGui::GetWindowWidth() + 5;
-		}
-
-		if (ImGui::Begin("Universal", nullptr)) {
-			ImGui::SetWindowPos({ level_xPos, 5 });
-			universal_xPos = level_xPos + ImGui::GetWindowWidth() + 5;
-			addingSpeedhackY = ImGui::GetWindowHeight() + 10;
-		}
-
-		if (ImGui::Begin("Speedhack", nullptr)) {
-			ImGui::SetWindowPos({ level_xPos, addingSpeedhackY });
-		}
-
-		if (ImGui::Begin("Status", nullptr)) {
-			ImGui::SetWindowPos({ universal_xPos, 5 });
-		}
+		sortTabs();
 
 		// Bypass
 
@@ -921,7 +988,7 @@ void imgui_render() {
 		if (ImGui::Begin("PolzHax", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar)); {
 			ImGui::SetWindowFontScale(setting().UISize);
 
-			ImGui::Text("2.011 - v1.0.32");
+			ImGui::Text("2.011 - v1.0.33");
 
 			ImGui::Checkbox("Auto Save", &setting().onAutoSave);
 			ImGui::SameLine(0.f, 7.5f);
@@ -946,7 +1013,9 @@ void imgui_render() {
 			}
 			ImGui::SetNextItemWidth(185.f);
 			if (ImGui::Combo("##thrprio", &setting().g_priority, priorities, 5)) {
-				updatePriority(setting().onThreadPriority ? setting().g_priority : 2);
+				if (setting().onThreadPriority) {
+					updatePriority(setting().g_priority);
+				}
 			}
 			
 			char buffer[256];
@@ -980,54 +1049,7 @@ void imgui_render() {
 			}
 
 			if (ImGui::Button("Sort Tabs", ImVec2(185, 0))) {
-				float polzhax_xPos;
-				float bypass_xPos;
-				float cosmetic_xPos;
-				float creator_xPos;
-				float level_xPos;
-				float universal_xPos;
-				float addingSpeedhackY;
-				float addingUtilityY;
-
-				if (ImGui::Begin("PolzHax", nullptr)) {
-					ImGui::SetWindowPos({ 5,5 });
-					polzhax_xPos = ImGui::GetWindowWidth() + 10;
-				}
-
-				if (ImGui::Begin("Bypass", nullptr)) {
-					ImGui::SetWindowPos({ polzhax_xPos, 5 });
-					bypass_xPos = polzhax_xPos + ImGui::GetWindowWidth() + 5;
-					addingUtilityY = ImGui::GetWindowHeight() + 10;
-				}
-
-				if (ImGui::Begin("Utility", nullptr)) {
-					ImGui::SetWindowPos({ polzhax_xPos, addingUtilityY });
-				}
-
-				if (ImGui::Begin("Cosmetic", nullptr)) {
-					ImGui::SetWindowPos({ bypass_xPos, 5 });
-					cosmetic_xPos = bypass_xPos + ImGui::GetWindowWidth() + 5;
-				}
-
-				if (ImGui::Begin("Creator", nullptr)) {
-					ImGui::SetWindowPos({ cosmetic_xPos, 5 });
-					creator_xPos = cosmetic_xPos + ImGui::GetWindowWidth() + 5;
-				}
-
-				if (ImGui::Begin("Level", nullptr)) {
-					ImGui::SetWindowPos({ creator_xPos, 5 });
-					level_xPos = creator_xPos + ImGui::GetWindowWidth() + 5;
-				}
-
-				if (ImGui::Begin("Universal", nullptr)) {
-					ImGui::SetWindowPos({ level_xPos, 5 });
-					universal_xPos = level_xPos + ImGui::GetWindowWidth() + 5;
-					addingSpeedhackY = ImGui::GetWindowHeight() + 10;
-				}
-
-				if (ImGui::Begin("Speedhack", nullptr)) {
-					ImGui::SetWindowPos({ level_xPos, addingSpeedhackY });
-				}
+				sortTabs();
 			}
 
 			if (GetAsyncKeyState(0x31) && GetAsyncKeyState(0x37) && GetAsyncKeyState(0x30) && GetAsyncKeyState(0x33))

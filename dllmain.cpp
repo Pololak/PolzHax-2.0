@@ -29,6 +29,7 @@
 #include "LevelSettingsLayer.hpp"
 #include "UILayer.hpp"
 #include "GJScaleControl.hpp"
+#include "GJRotationControl.hpp"
 
 #include "LevelShare.h"
 #include "nfd.h"
@@ -365,6 +366,7 @@ DWORD WINAPI my_thread(void* hModule) {
 	sequence_patch((uint32_t)gd::base + 0xd9a48, { 0xf0, 0xcd, 0x60, 0x00 }); // EditorOptionsLayer Buttons Per Row node
 	//sequence_patch((uint32_t)gd::base + 0x5b803, { 0x00, 0x00, 0xa0, 0x42 }); // EditorPauseLayer::customSetup Keys button
 	//sequence_patch((uint32_t)gd::base + 0x5b882, { 0x00, 0x00, 0xf0, 0x42 }); // EditorPauseLayer::customSetup Options button
+	sequence_patch((uint32_t)gd::base + 0x2031fc, { 0x42, 0x61, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }); // Progress Bar -> Bar
 
 	//AllocConsole();
 	//freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
@@ -393,6 +395,7 @@ DWORD WINAPI my_thread(void* hModule) {
 	//LevelSettingsLayer::mem_init();
 	UILayer::mem_init();
 	//GJScaleControl::mem_init();
+	//GJRotationControl::mem_init();
 
 	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x9afc0), GameManager_isIconUnlockedH, reinterpret_cast<void**>(&GameManager_isIconUnlocked));
 	//MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x9b2a0), GameManager_isColorUnlockedH, reinterpret_cast<void**>(&GameManager_isColorUnlocked));

@@ -121,8 +121,3 @@ namespace GJScaleControl {
 	inline void(__thiscall* ccTouchMoved)(gd::GJScaleControl*, CCTouch*, CCEvent*);
 	void __fastcall ccTouchMovedH(gd::GJScaleControl*, void*, CCTouch*, CCEvent*);
 }
-
-namespace GJRotationControl {
-	inline void(__thiscall* ccTouchMoved)(gd::GJRotationControl*, CCTouch*, CCEvent*);
-	void __fastcall ccTouchMovedH(gd::GJRotationControl*, void*, CCTouch*, CCEvent*);
-}

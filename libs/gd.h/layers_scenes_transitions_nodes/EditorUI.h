@@ -19,6 +19,14 @@ namespace gd {
 
 	class GJRotationControl : public cocos2d::CCLayer {
 	public:
+		cocos2d::CCPoint m_cursorDifference; // 0x118
+		cocos2d::CCPoint m_controlPosition; // 0x11c
+		cocos2d::CCSprite* m_controlSprite; // 0x120
+		float m_startingRotation; // 0x124
+		float m_currentRotation; // 0x128
+		int m_touchID; // 0x12c
+		GJRotationControlDelegate* m_delegate; // 0x130
+
 		void finishTouch() {
 			reinterpret_cast<void(__fastcall*)(GJRotationControl*)>(base + 0x73fa0)(this);
 		}

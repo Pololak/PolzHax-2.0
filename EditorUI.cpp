@@ -621,11 +621,6 @@ void __fastcall GJScaleControl::ccTouchMovedH(gd::GJScaleControl* self, void*, C
 	gd::GameManager::sharedState()->getLevelEditorLayer()->m_editorUI->updateObjectInfoLabel();
 }
 
-void __fastcall GJRotationControl::ccTouchMovedH(gd::GJRotationControl* self, void*, CCTouch* touch, CCEvent* event) {
-	GJRotationControl::ccTouchMoved(self, touch, event);
-	gd::GameManager::sharedState()->getLevelEditorLayer()->m_editorUI->updateObjectInfoLabel();
-}
-
 CCArray* objArr;
 
 void addObject(int id) {
@@ -705,7 +700,6 @@ void EditorUI::mem_init() {
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x6e1b0), EditorUI::moveObjectCallH, reinterpret_cast<void**>(&EditorUI::moveObjectCall));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x6e540), EditorUI::transformObjectCallH, reinterpret_cast<void**>(&EditorUI::transformObjectCall));
 
-	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x740e0), GJRotationControl::ccTouchMovedH, reinterpret_cast<void**>(&GJRotationControl::ccTouchMoved));
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x74780), GJScaleControl::ccTouchMovedH, reinterpret_cast<void**>(&GJScaleControl::ccTouchMoved));
 
 	MH_CreateHook(reinterpret_cast<void*>(gd::base + 0x70a20), EditorUI::ccTouchBeganH, reinterpret_cast<void**>(&EditorUI::ccTouchBegan));

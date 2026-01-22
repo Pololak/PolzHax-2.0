@@ -103,7 +103,7 @@ void Hitboxes::drawPlayerHitbox(gd::PlayerObject* player, CCDrawNode* drawNode)
     }
 
     Hitboxes::drawRect(drawNode, rectRectangleSmall, { setting().solidHitboxesR / 255.f, setting().solidHitboxesG / 255.f, setting().solidHitboxesB / 255.f, setting().hitboxesOpacity / 255.f });
-    drawNode->drawPolygon(vert, 4, { 0, 0, 0, 0 }, 0.5, { (setting().hazardHitboxesR / 255.f) / 2.f, (setting().hazardHitboxesG / 255.f) / 2.f, (setting().hazardHitboxesB / 255.f) / 2.f, setting().hitboxesOpacity / 255.f });
+    drawNode->drawPolygon(vert, 4, { 0, 0, 0, 0 }, .5, { (setting().hazardHitboxesR / 255.f) / 2.f, (setting().hazardHitboxesG / 255.f) / 2.f, (setting().hazardHitboxesB / 255.f) / 2.f, setting().hitboxesOpacity / 255.f });
     Hitboxes::drawRect(drawNode, rectRectangle, { setting().hazardHitboxesR / 255.f, setting().hazardHitboxesG / 255.f, setting().hazardHitboxesB / 255.f, setting().hitboxesOpacity / 255.f });
 }
 
@@ -121,7 +121,7 @@ void Hitboxes::drawSolidsObjectHitbox(gd::GameObject* obj, CCDrawNode* drawNode)
 
 void Hitboxes::drawHazardsObjectHitbox(gd::GameObject* obj, CCDrawNode* drawNode) {
     if (obj->m_groupDisable || obj->m_isDestroyed) return;
-    if (obj->getObjectRadius() > 0)
+    if ((obj->getObjectRadius() > 0) && obj->m_objectType == gd::GameObjectType::kGameObjectTypeHazard)
         Hitboxes::drawCircleObj(drawNode, obj, { setting().hazardHitboxesR / 255.f, setting().hazardHitboxesG / 255.f, setting().hazardHitboxesB / 255.f, setting().hitboxesOpacity / 255.f });
     else if (obj->m_objectType == gd::GameObjectType::kGameObjectTypeHazard)
         Hitboxes::drawRectObj(drawNode, obj, { setting().hazardHitboxesR / 255.f, setting().hazardHitboxesG / 255.f, setting().hazardHitboxesB / 255.f, setting().hitboxesOpacity / 255.f });

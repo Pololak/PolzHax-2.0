@@ -169,6 +169,7 @@
     <ClInclude Include="EndLevelLayer.h" />
     <ClInclude Include="explorer.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="GJRotationControl.hpp" />
     <ClInclude Include="GJScaleControl.hpp" />
     <ClInclude Include="Hitboxes.h" />
     <ClInclude Include="ImGuiUtils.hpp" />
@@ -682,6 +683,7 @@
     <ClCompile Include="EditorUI.cpp" />
     <ClCompile Include="EndLevelLayer.cpp" />
     <ClCompile Include="explorer.cpp" />
+    <ClCompile Include="GJRotationControl.cpp" />
     <ClCompile Include="GJScaleControl.cpp" />
     <ClCompile Include="GlobalClipboard.cpp" />
     <ClCompile Include="GlobalClipboard.h" />
