@@ -274,7 +274,7 @@ private:
     float getLetterPosXLeft( CCSprite* characterSprite );
     float getLetterPosXRight( CCSprite* characterSprite );
     
-protected:
+public:
     virtual void setString(unsigned short *newString, bool needUpdateLabel);
     // string to render
     unsigned short* m_sString;

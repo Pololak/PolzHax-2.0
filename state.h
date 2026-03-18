@@ -166,18 +166,18 @@ struct SettingStruct {
 	int labelsFont = 0;
 	bool onHideLabels;
 	//
-	bool onCheatIndicator;
-	bool onMessageLabel; std::string message;
-	bool onFPSCounter;
-	bool onCPSCounter;
-	bool onNoclipAccuracy;
-	bool onNoclipDeaths;
-	bool onClockLabel;
-	bool onSessionTime;
-	bool onBestRunLabel;
-	bool onAttemptsLabel;
-	bool onJumpsLabel;
-	bool onMetaLabel;
+	bool onCheatIndicator; int cheatIndicatorPos = 0;
+	bool onMessageLabel; std::string message; int messagePos = 0;
+	bool onFPSCounter, fpsPrefix = true; int fpsCounterPos = 0;
+	bool onCPSCounter, cpsPrefix = true, cpsMax = true, cpsTotal; int cpsCounterPos = 0;
+	bool onNoclipAccuracy, nocAccPrefix = true; int nocAccPos = 0;
+	bool onNoclipDeaths, nocDeathsPrefix = true; int nocDeathsPos = 0;
+	bool onClockLabel; int clockPos = 0;
+	bool onSessionTime; int sessionTimePos = 0;
+	bool onBestRunLabel, bestRunPrefix = true; int bestRunPos = 0;
+	bool onAttemptsLabel, attemptsPrefix = true; int attemptsPos = 0;
+	bool onJumpsLabel, jumpsPrefix = true; int jumpsPos = 0;
+	bool onMetaLabel; int metaPos = 0;
 
 	bool onSelectFilter;
 	bool onExtraObjectInfo;
@@ -377,6 +377,18 @@ DEF_SCHEMA(
 	labelsScale,
 	labelsFont,
 	onHideLabels,
+	onCheatIndicator, cheatIndicatorPos,
+	onMessageLabel, message, messagePos,
+	onFPSCounter, fpsPrefix, fpsCounterPos,
+	onCPSCounter, cpsPrefix, cpsMax, cpsTotal, cpsCounterPos,
+	onNoclipAccuracy, nocAccPrefix, nocAccPos,
+	onNoclipDeaths, nocDeathsPrefix, nocDeathsPos,
+	onClockLabel, clockPos,
+	onSessionTime, sessionTimePos,
+	onBestRunLabel, bestRunPrefix, bestRunPos,
+	onAttemptsLabel, attemptsPrefix, attemptsPos,
+	onJumpsLabel, jumpsPrefix, jumpsPos,
+	onMetaLabel, metaPos,
 
 	onSelectFilter,
 	onExtraObjectInfo,

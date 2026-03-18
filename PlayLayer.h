@@ -5,6 +5,9 @@ namespace PlayLayer {
 	inline bool(__thiscall* init)(gd::PlayLayer*, gd::GJGameLevel*);
 	bool __fastcall initH(gd::PlayLayer*, void*, gd::GJGameLevel*);
 
+	inline void(__thiscall* destructor)(gd::PlayLayer*);
+	void __fastcall destructorH(gd::PlayLayer*);
+
 	inline void(__thiscall* update)(gd::PlayLayer*, float);
 	void __fastcall updateH(gd::PlayLayer*, void*, float);
 
@@ -50,14 +53,23 @@ namespace PlayLayer {
 	inline void(__thiscall* showNewBest)(gd::PlayLayer*);
 	void __fastcall showNewBestH(gd::PlayLayer*);
 
-	void updatePlayerColors(gd::PlayLayer*);
+	inline void(__thiscall* pushButton)(gd::PlayLayer*, int, bool);
+	void __fastcall pushButtonH(gd::PlayLayer*, void*, int, bool);
 
-	void updateCheatIndicator(gd::PlayLayer*);
+	inline void(__thiscall* releaseButton)(gd::PlayLayer*, int, bool);
+	void __fastcall releaseButtonH(gd::PlayLayer*, void*, int, bool);
+
+	void updatePlayerColors(gd::PlayLayer*);
 
 	void updateShowHitboxes(gd::PlayLayer*);
 
+	void updateStatusLabels();
+
 	void onPrevStartPos();
 	void onNextStartPos();
+
+	bool isCheating();
+	bool getCheatingBeforeRestart();
 
 	void mem_init();
 }

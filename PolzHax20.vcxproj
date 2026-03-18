@@ -106,6 +106,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalDependencies>$(SolutionDir)libs\MinHook\libMinHook-x86-v141-mtd.lib;$(SolutionDir)libs\cocos-headers\cocos2dx\libcocos2d.lib;$(SolutionDir)libs\cocos-headers\extensions\libExtensions.lib;$(SolutionDir)libs\glew32.lib;$(SolutionDir)libs\detours\libdetours.lib;$(SolutionDir)libs\fmod-headers\fmod.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Version>
+      </Version>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /F "$(TargetPath)" "D:\GD PC Builds\SilvrPS"</Command>
