@@ -649,14 +649,6 @@ bool __fastcall PlayLayer::initH(gd::PlayLayer* self, void*, gd::GJGameLevel* le
 	}
 
 	if (setting().onDeveloperMode) {
-		auto cheatIndicator = CCLabelBMFont::create(".", "bigFont.fnt");
-		cheatIndicator->setAnchorPoint({ 0.f, 1.f });
-		cheatIndicator->setScale(.35f);
-		cheatIndicator->getChildByTag(0)->setScale(2.5f);
-		cheatIndicator->getChildByTag(0)->setAnchorPoint({ 0.f, .25f });
-		cheatIndicator->setPosition(director->getScreenLeft(), director->getScreenTop());
-		self->m_uiLayer->addChild(cheatIndicator, 99, 4900);
-
 		auto playerInfo = CCLabelBMFont::create("FPS: X: Y: yVel: xVel: SlopeVel: Speed: ", "chatFont.fnt");
 		playerInfo->setAnchorPoint({ 0.f, 0.f });
 		playerInfo->setScale(.5f);
